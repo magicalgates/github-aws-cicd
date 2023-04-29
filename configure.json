@@ -1,0 +1,30 @@
+{
+    "Parameters": {
+        "Timeout": "120",
+        "ResourceNamePrefix": "NDS-CYNC",
+        "Environment": "POC",
+        "Runtime": "python3.9",
+        "LambdaMemory": "128",
+        "HandlerName": "index.handler",
+        "ApplicationID": "Cync-Tech-DW",
+        "Project": "NDS-CYNC",
+        "Owner": "NDS",
+        "InfoClassification": "Internal",
+        "ServiceName": "Cync-Tech-DW",
+        "ReportsS3BucketName": "nds-cync-prod-tech-capi-reports-bucket",
+        "ParameterStoreEnv": "NDS-DEV-Cync-Tech-DW-Parameter",
+        "ExpirationInDays": "730",
+        "S3LenderNames": "nds-cync-prod-tech-capital-report,NONE,NONE,NONE,NONE,NONE,NONE,NONE,NONE,NONE"
+        
+    },
+    "Tags": {
+        "Name": "NDS-CYNC-PROD-Tech-Capital-Lambda-Stack",
+        "Owner": "NDS",
+        "Environment": "PROD",
+        "Project": "NDS-CYNC",
+        "InfoClassification": "Internal",
+        "ApplicationID": "Cync-Tech-DW",
+        "ApplicationRole": "Cync-Tech-DW-CFN",
+        "Automation": "TRUE"
+    }
+}
