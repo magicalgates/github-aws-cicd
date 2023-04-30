@@ -1,0 +1,133 @@
+{
+    "Comment": "Cync EOD feature",
+    "StartAt": "RunAblCron",
+    "States": {
+      "RunAblCron": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::apigateway:invoke.waitForTaskToken",
+        "HeartbeatSeconds": 500,
+        "Parameters": {
+          "ApiEndpoint": "qviw3yvz36.execute-api.us-east-1.amazonaws.com",
+          "Method": "POST",
+          "Headers": {
+            "lenderid.$": "States.Array($.lender)",
+            "backkey.$": "States.Array($.backkey)",
+            "Accept": [
+              "application/json"
+            ],
+            "Content-Type": [
+              "application/json"
+            ]
+          },
+          "RequestBody": {
+            "collateral": {
+              "task_token.$": "$$.Task.Token",
+              "user_id": 2
+            }
+          },
+          "Stage": "prod",
+          "Path": "collateral"
+        },
+        "ResultPath": "$.ablCronOutput",
+        "Next": "RunMclCron",
+        "Catch": [
+          {
+            "ErrorEquals": [
+              "States.ALL"
+            ],
+            "ResultPath": "$.abl_catcher_error-info",
+            "Next": "RunMclCron"
+          }
+        ]
+      },
+      "RunMclCron": {
+        "Type": "Task",
+        "Resource": "arn:aws:states:::apigateway:invoke.waitForTaskToken",
+        "HeartbeatSeconds": 500,
+        "Parameters": {
+          "ApiEndpoint": "qviw3yvz36.execute-api.us-east-1.amazonaws.com",
+          "Method": "POST",
+          "Headers": {
+            "backkey.$": "States.Array($.backkey)",
+            "lenderid.$": "States.Array($.lender)",
+            "Accept": [
+              "application/json"
+            ],
+            "Content-Type": [
+              "application/json"
+            ]
+          },
+          "RequestBody": {
+            "collateral": {
+              "task_token.$": "$$.Task.Token",
+              "further": "things",
+              "mcl": true,
+              "user_id": 2,
+              "sleep": 15
+            }
+          },
+          "Stage": "prod",
+          "Path": "mcl"
+        },
+        "ResultPath": "$.mclCronOutput",
+        "Next": "EodCollateralFileGeneraration",
+        "Catch": [
+          {
+            "ErrorEquals": [
+              "States.ALL"
+            ],
+            "ResultPath": "$.mcl_catcher_error-info",
+            "Next": "EodCollateralFileGeneraration"
+          }
+        ]
+      },
+      "EodCollateralFileGeneraration": {
+        "Type": "Task",
+        "Parameters": {
+          "lender.$": "$.lender"
+        },
+        "Resource": "arn:aws:lambda:us-east-1:436415935402:function:NDS-CYNC-PROD-EOD-SF-COLLATERAL-FILE-GEN-LAMBDA",
+        "ResultPath": "$.collateralFileGenerationOutput",
+        "Next": "EodCollateralFileNotification"
+      },
+      "EodCollateralFileNotification": {
+        "Type": "Task",
+        "Resource": "arn:aws:lambda:us-east-1:436415935402:function:NDS-CYNC-PROD-EOD-SF-COLLATERAL-FILE-NOTIFICATION-LAMBDA",
+        "Parameters": {
+          "lender.$": "$.lender",
+          "file_name.$": "$.collateralFileGenerationOutput.file_name",
+          "record_count.$": "$.collateralFileGenerationOutput.data_count"
+        },
+        "ResultPath": "$.iScollateralFileNotificationSuccess",
+        "Next": "EodGlFileGeneration"
+      },
+      "EodGlFileGeneration": {
+        "Type": "Task",
+        "Resource": "arn:aws:lambda:us-east-1:436415935402:function:NDS-CYNC-PROD-EOD-SF-GL-FILE-GEN-LAMBDA",
+        "Parameters": {
+          "lender.$": "$.lender",
+          "eod_id.$": "$.eod_id"
+        },
+        "ResultPath": "$.eodGlFileGenerationOutput",
+        "Next": "EodGlFileNotification"
+      },
+      "EodGlFileNotification": {
+        "Type": "Task",
+        "Resource": "arn:aws:lambda:us-east-1:436415935402:function:NDS-CYNC-PROD-EOD-SF-GL-FILE-NOTIFICATION-LAMBDA",
+        "Parameters": {
+          "lender.$": "$.lender",
+          "data_file_name.$": "$.eodGlFileGenerationOutput.data_file_name",
+          "control_file_name.$": "$.eodGlFileGenerationOutput.control_file_name",
+          "data_count.$": "$.eodGlFileGenerationOutput.data_count"
+        },
+        "ResultPath": "$.eodGlFileNotificationSuccess",
+        "Next": "EodSuccessNotification"
+      },
+      "EodSuccessNotification": {
+        "Type": "Task",
+        "InputPath": "$",
+        "Resource": "arn:aws:lambda:us-east-1:436415935402:function:NDS-CYNC-PROD-EOD-SF-SUCCESS-NOTIFICATION-LAMBDA",
+        "End": true
+      }
+    }
+  }
