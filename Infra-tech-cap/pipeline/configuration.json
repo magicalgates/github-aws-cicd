@@ -11,7 +11,7 @@
         "Owner": "NDS",
         "InfoClassification": "Internal",
         "ServiceName": "Cync-Tech-DW",
-        "ReportsS3BucketName": "nds-cync-prod-tech-capi-reports-bucket",
+        "S3BucketName": "nds-cync-prod-tech-capi-reports-bucket",
         "ParameterStoreEnv": "NDS-DEV-Cync-Tech-DW-Parameter",
         "ExpirationInDays": "730",
         "S3LenderNames": "nds-cync-prod-tech-capital-report,NONE,NONE,NONE,NONE,NONE,NONE,NONE,NONE,NONE"
