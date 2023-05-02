@@ -3,7 +3,7 @@
         "Timeout": "120",
         "ResourceNamePrefix": "NDS-CYNC",
         "Environment": "POC",
-        "Runtime": "python3.9",
+        "Runtime": "nodejs16.x",
         "LambdaMemory": "128",
         "HandlerName": "index.handler",
         "ApplicationID": "Cync-Tech-DW",
@@ -20,7 +20,7 @@
     "Tags": {
         "Name": "NDS-CYNC-PROD-Tech-Capital-Lambda-Stack",
         "Owner": "NDS",
-        "Environment": "PROD",
+        "Environment": "POC",
         "Project": "NDS-CYNC",
         "InfoClassification": "Internal",
         "ApplicationID": "Cync-Tech-DW",
