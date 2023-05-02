@@ -32,6 +32,12 @@ Parameters:
     - PRESTAGING
     - UAT
     - PROD
+  VPCConfiguration:
+    Type: String
+    Description: Specify wheather VPC Configuration is Required or not for Lambda Function.
+    AllowedValues:
+     - true
+     - false
   Project:
     Type: String
     Description: Enter the value for tag Project.
@@ -171,6 +177,7 @@ Mappings:
       - subnet-4b95272c
       VpcId: vpc-b53bfadf
 Conditions:
+  ShouldCreateVPC: !Equals [true, !Ref VPCConfiguration]
   Ingress0Exist:
     Fn::Equals:
     - Fn::Select:
@@ -1418,6 +1425,7 @@ Resources:
           Ref: Compliance
   Lambda:
     Type: AWS::Serverless::Function
+    Condition: ShouldCreateVPC
     Properties:
       CodeUri: ./Infra-tech-cap/Lambda-Tech-Capital/code
       Description: Lambda function to alert the users
