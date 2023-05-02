@@ -3,6 +3,7 @@
         "Timeout": "120",
         "ResourceNamePrefix": "NDS-CYNC",
         "Environment": "POC",
+        "VPCConfiguration":"false",
         "Runtime": "nodejs16.x",
         "LambdaMemory": "128",
         "HandlerName": "index.handler",
