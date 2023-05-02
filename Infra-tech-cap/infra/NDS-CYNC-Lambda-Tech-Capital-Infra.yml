@@ -1419,7 +1419,7 @@ Resources:
   Lambda:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://yashdemobucket007/Infra-tech-cap/lambdacode/code/index.zip
+      CodeUri: ./Infra-tech-cap/Lambda-Tech-Capital/code
       Description: Lambda function to alert the users
       FunctionName:
         Fn::Sub: ${ResourceNamePrefix}-${Environment}-${ServiceName}-Lambda
