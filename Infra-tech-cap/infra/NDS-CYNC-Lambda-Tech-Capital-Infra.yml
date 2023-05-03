@@ -32,6 +32,13 @@ Parameters:
     - PRESTAGING
     - UAT
     - PROD
+  UseVPC:
+    Type: String
+    Description: Specify whether VPC should associate with Lambda.
+    Default: false
+    AllowedValues:
+      - true
+      - false
   Project:
     Type: String
     Description: Enter the value for tag Project.
@@ -171,6 +178,9 @@ Mappings:
       - subnet-4b95272c
       VpcId: vpc-b53bfadf
 Conditions:
+  VPCAssociation: !Equals 
+    - !Ref UseVPC
+    - 'true'
   Ingress0Exist:
     Fn::Equals:
     - Fn::Select:
@@ -534,6 +544,7 @@ Conditions:
 Resources:
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
+    Condition: VPCAssociation
     Properties:
       GroupName:
         Fn::Sub: ${ResourceNamePrefix}-${Environment}-${ServiceName}-SG
@@ -1439,14 +1450,15 @@ Resources:
         Variables:
           ParameterName:
             Ref: ParameterStoreEnv
-      VpcConfig:
-        SecurityGroupIds:
-        - Ref: SecurityGroup
-        SubnetIds:
-          Fn::FindInMap:
-          - Environments
-          - Ref: Environment
-          - Subnets
+      VpcConfig: !If 
+        - VPCAssociation
+        - SecurityGroupIds: !Ref SecurityGroup
+          SubnetIds:
+            - !FindInMap 
+              - Environments
+              - !Ref Environment
+              - Subnets
+        - !Ref 'AWS::NoValue'
       Tags:
         Name:
           Fn::Sub: ${ResourceNamePrefix}-${Environment}-${ServiceName}-Lambda
