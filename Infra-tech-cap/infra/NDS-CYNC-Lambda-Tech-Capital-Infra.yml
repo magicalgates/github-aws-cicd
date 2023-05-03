@@ -1429,7 +1429,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./Infra-tech-cap/Lambda-Tech-Capital/code
-      Description: Lambda function to alert the users
+      Description: This Lambda function sends reports to the users
       FunctionName:
         Fn::Sub: ${ResourceNamePrefix}-${Environment}-${ServiceName}-Lambda
       Handler:
@@ -1448,14 +1448,12 @@ Resources:
         Variables:
           ParameterName:
             Ref: ParameterStoreEnv
-      VpcConfig: !If 
+      VpcConfig: !If
         - VPCAssociation
-        - SecurityGroupIds: !Ref SecurityGroup
+        - SecurityGroupIds:
+            - !GetAtt SecurityGroup.GroupId
           SubnetIds:
-            - !FindInMap 
-              - Environments
-              - !Ref Environment
-              - Subnets
+            !FindInMap [Environments, !Ref Environment, Subnets]
         - !Ref 'AWS::NoValue'
       Tags:
         Name:
