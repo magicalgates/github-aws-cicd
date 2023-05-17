@@ -18,7 +18,7 @@
         "S3FolderNames": "nds-cync-prod-tech-capital-report,nds-cync-prod-liquid-capital-report,nds-cync-prod-garrigton-report,NONE,NONE,NONE,NONE,NONE,NONE,NONE",
         "LoggingBucket": "cloudformationmanageduploadinfra-accesslogsbucket-1b524uuq9oq4d",
         "LoggingBucketPrefix": "",
-        "LoggingConfiguration": "true"
+        "LoggingConfiguration": "false"
     },
     "Tags": {
         "Name": "NDS-CYNC-PROD-Tech-Capital-Lambda-Stack",
