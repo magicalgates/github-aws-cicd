@@ -133,6 +133,21 @@ Parameters:
     Type: String
     Description: Enter the objects expiry date in the S3 bucket
     Default: '30'
+  LoggingBucket:
+    Type: String
+    Description: Enter the access log bucket name
+    Default: ''
+  LoggingBucketPrefix:
+    Type: String
+    Description: Enter the access log bucket folder name
+    Default: ''
+  LoggingConfiguration:
+    Type: String
+    Description: Specify if logging configuration should be enabled
+    Default: false
+    AllowedValues:
+      - true
+      - false
 Mappings:
   Environments:
     POC:
@@ -176,6 +191,9 @@ Mappings:
       - subnet-4b95272c
       VpcId: vpc-b53bfadf
 Conditions:
+  LogConfiguration: !Equals
+    - !Ref LoggingConfiguration
+    - 'true'
   VPCAssociation: !Equals 
     - !Ref UseVPC
     - 'true'
@@ -1501,6 +1519,11 @@ Resources:
             Ref: S3ObjectExpInDays
       BucketName:
         Ref: S3BucketName
+      LoggingConfiguration: !If
+        - LogConfiguration
+        - DestinationBucketName: !Ref LoggingBucket
+          LogFilePrefix: !Ref LoggingBucketPrefix
+        - !Ref 'AWS::NoValue'
       NotificationConfiguration:
         LambdaConfigurations:
         - Fn::If:
