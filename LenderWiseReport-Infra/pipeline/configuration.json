@@ -17,11 +17,7 @@
         "LoggingBucket": "cloudformationmanageduploadinfra-accesslogsbucket-1b524uuq9oq4d",
         "LoggingBucketPrefix": "",
         "LoggingConfiguration": "false",
-        "S3BucketCreation": "false",
-        "CompatibleArchitecture": "x86_64",
-        "CompatibleRuntime": "python3.10",
-        "BucketName": "yashdemobucket007",
-        "Bucketkey": "LenderWiseReport-Infra/LenderWiseReportPackage.zip"
+        "S3BucketCreation": "false"
     },
     "Tags": {
         "Name": "NDS-CYNC-PROD-LenderWiseReport-Automation-Lambda-Stk",
