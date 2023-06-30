@@ -3,7 +3,7 @@
   phases:
     install:
       runtime-versions:
-        python: 3.10
+        python: 3.11
       commands:
         - pip install --upgrade pip
         - ls -l && python --version
