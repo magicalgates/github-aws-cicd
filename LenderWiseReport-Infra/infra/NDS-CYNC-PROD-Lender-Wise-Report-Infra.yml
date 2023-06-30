@@ -142,13 +142,30 @@ Parameters:
     AllowedValues:
       - true
       - false
-  s3bucketcreation:
+  S3BucketCreation:
     Type: String 
     Description: Specify wheather s3 bucket should create or not 
     Default: false
     AllowedValues:
       - true
       - false
+  CompatibleArchitecture:
+    Type: List<String>
+    Description: Specify Lambda Layer CompatibleArchitectures
+    Default: x86_64
+  CompatibleRuntime:
+    Type: List<String>
+    Description: Specify Runtime for Lambda Layer
+    Default: python3.10
+  BucketName:
+    Type: String
+    Description: Enter the bucket name where lambda layer package zip file is stored
+    Default: ""
+  BucketKey:
+    Type: String
+    Description: Enter the s3 key where lambda layer package zip file is stored
+    Default: ""
+  
 Mappings:
   Environments:
     POC:
@@ -193,7 +210,7 @@ Mappings:
       VpcId: vpc-b53bfadf
 Conditions:
   ShouldCreates3: !Equals
-    - !Ref s3bucketcreation
+    - !Ref S3BucketCreation
     - 'true'
   LogConfiguration: !Equals
     - !Ref LoggingConfiguration
@@ -1398,7 +1415,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./LenderWiseReport-Infra/Lambda-LenderWiseReport/code
-      Description: This Lambda function create Lender wise cost report and sends reports to the users
+      Description: This Lambda function creates lender wise cost report and sends reports to the users
       FunctionName:
         Fn::Sub: ${ResourceNamePrefix}-${Environment}-${ServiceName}-Lambda
       Handler:
@@ -1413,6 +1430,8 @@ Resources:
         Ref: Runtime
       Timeout:
         Ref: Timeout
+      Layers:
+        Ref: LambdaLayer
       VpcConfig: !If
         - VPCAssociation
         - SecurityGroupIds:
@@ -1435,6 +1454,18 @@ Resources:
           Ref: Owner
         InfoClassification:
           Ref: InfoClassification
+  LambdaLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties: 
+      CompatibleArchitectures: 
+        - !Ref CompatibleArchitecture
+      CompatibleRuntimes: 
+        - !Ref CompatibleRuntime
+      Content: 
+          S3Bucket: !Ref BucketName
+          S3Key: !Ref Bucketkey
+      Description: Pandas, Numpy, Openpyxl, et_xmlfile packages for lambda and supports python 3.10 runtime.
+      LayerName: !Sub ${ResourceNamePrefix}-${Environment}-${ServiceName}-LambdaLayer
   S3Bucket:
     Type: AWS::S3::Bucket
     Condition: ShouldCreates3
