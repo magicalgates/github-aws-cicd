@@ -8,9 +8,10 @@
       commands:
         - pip install --upgrade pip
         - ls -l && python --version
-        #- aws s3 cp s3://${S3_REQUIREMENTS_FILE_PATH} requirements.txt
+        - pip install cfn-lint
         - cd LenderWiseReport-Infra/Lambda-LenderWiseReport/code
         - pip install -r requirements.txt --target .
+        - cd ../../../
       finally:
         - echo Installation phase has been completed.
     pre_build:
@@ -34,11 +35,12 @@
         - echo Build completed on `date`
         - echo Downloading the cloudformation configuration file
         - aws s3 cp s3://${S3_CONFIGURATION_FILE_PATH} ./configuration.json
-        - ls -l
       finally:
         - echo Template and Configuration download
+        - ls -l
+        - pwd
 
   artifacts:
     files:
-      - ./LenderWiseReport-Infra/Lambda-LenderWiseReport/code/packaged-template.yml
-      - ./LenderWiseReport-Infra/Lambda-LenderWiseReport/code/configuration.json
+      - ./packaged-template.yml
+      - ./configuration.json
