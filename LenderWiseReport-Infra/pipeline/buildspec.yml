@@ -1,6 +1,15 @@
   version: 0.2
 
   phases:
+    pre_build:
+      commands:
+        - echo Entered the pre_build phase...
+        - echo Downloading requirements.txt from S3
+        - aws s3 cp s3://${S3_REQUIREMENTS_FILE_PATH} ./requirements.txt
+        - echo Downloading the serverless template
+        - aws s3 cp s3://${S3_TEMPLATE_FILE_PATH} ./template.yml
+      finally:
+        - echo Template and Configuration download
     install:
       runtime-versions:
         python: 3.x
@@ -8,16 +17,9 @@
       commands:
         - pip install --upgrade pip
         - ls -l && python --version
-        - pip install --requirement ${S3_REQUIREMENTS_FILE_PATH}
+        - pip install --requirement ./requirements.txt
       finally:
         - echo Installation phase has been completed.
-    pre_build:
-      commands:
-        - echo Entered the pre_build phase...
-        - echo Downloading the serverless template
-        - aws s3 cp s3://${S3_TEMPLATE_FILE_PATH} ./template.yml
-      finally:
-        - echo Template and Configuration download
     build:
       commands:
         - ls -l
