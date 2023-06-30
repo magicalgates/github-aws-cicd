@@ -4,7 +4,6 @@
     install:
       runtime-versions:
         python: 3.x
-        nodejs: 16.x
       commands:
         - pip install --upgrade pip
         - ls -l && python --version
