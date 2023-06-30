@@ -40,6 +40,7 @@ Parameters:
     Default: idexcel-technologies-pvt-ltd
     AllowedValues:
       - idexcel-technologies-pvt-ltd
+      - magicalgates
 
   BuildArtifactsBucket:
     Description: S3 bucket name for artifacts to be stored
@@ -49,7 +50,7 @@ Parameters:
   Environment:
     Description: Name your Environment according to your need.
     Type: String
-    Default: DEV
+    Default: PROD
     AllowedValues:
       - DEV
       - DEV2
@@ -270,7 +271,7 @@ Resources:
       Environment:
         Type: LINUX_CONTAINER
         ComputeType: BUILD_GENERAL1_SMALL
-        Image: !Ref CodeBuildImage # More info on Images: https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-available.html
+        Image: !Ref CodeBuildImage
         EnvironmentVariables:
           -
             Name: BUILD_OUTPUT_BUCKET
@@ -315,7 +316,7 @@ Resources:
       Environment:
         Type: LINUX_CONTAINER
         ComputeType: BUILD_GENERAL1_SMALL
-        Image: !Ref CodeBuildImage # More info on Images: https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-available.html
+        Image: !Ref CodeBuildImage 
         EnvironmentVariables:
           -
             Name: LAMBDA_FUNCTION_NAME
@@ -364,7 +365,6 @@ Resources:
           Actions:
             - Name: Source
               ActionTypeId:
-                # More info on Possible Values: https://docs.aws.amazon.com/codepipeline/latest/userguide/reference-pipeline-structure.html#action-requirements
                 Category: Source
                 Owner: ThirdParty
                 Provider: GitHub
@@ -401,7 +401,6 @@ Resources:
                 Provider: CloudFormation
                 Version: "1"
               Configuration:
-                # More info on Possible Values for Cloudformation: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/continuous-delivery-codepipeline-action-reference.html#w2ab2c13c13b9
                 ActionMode: CHANGE_SET_REPLACE
                 RoleArn: !GetAtt CloudFormationExecutionRole.Arn
                 StackName: !Sub '${ResourceNamePrefix}-${Environment}-${ServiceName}-Infra-Stack'
