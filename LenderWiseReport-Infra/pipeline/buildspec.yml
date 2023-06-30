@@ -1,41 +1,42 @@
-version: 0.2
+  version: 0.2
 
-phases:
-  install:
-    runtime-versions:
-      python: 3.x
-      nodejs: 16.x
-    commands:
-      - pip install --upgrade pip
-      - ls -l && python --version
-      - pip install cfn-lint
-    finally:
-      - echo Installation phase has been completed.
-  pre_build:
-    commands:
-      - echo Entered the pre_build phase...
-      - echo Downloading the serverless template
-      - aws s3 cp s3://${S3_TEMPLATE_FILE_PATH} ./template.yml
-    finally:
-      - echo Template and Configuration download
-  build:
-    commands:
-      - ls -l
-      - echo Entered the build phase...
-      - echo Build and package cloudformation template
-      - aws cloudformation package --template-file template.yml --s3-bucket $BUILD_OUTPUT_BUCKET --output-template-file packaged-template.yml
-      - cat ./packaged-template.yml
-    finally:
-      - echo Build code and package
-  post_build:
-    commands:
-      - echo Build completed on `date`
-      - echo Downloading the cloudformation configuration file
-      - aws s3 cp s3://${S3_CONFIGURATION_FILE_PATH} ./configuration.json
-    finally:
-      - echo Template and Configuration download
+  phases:
+    install:
+      runtime-versions:
+        python: 3.x
+        nodejs: 16.x
+      commands:
+        - pip install --upgrade pip
+        - ls -l && python --version
+        - pip install --requirement requirements.txt
+      finally:
+        - echo Installation phase has been completed.
+    pre_build:
+      commands:
+        - echo Entered the pre_build phase...
+        - echo Downloading the serverless template
+        - aws s3 cp s3://${S3_TEMPLATE_FILE_PATH} ./template.yml
+      finally:
+        - echo Template and Configuration download
+    build:
+      commands:
+        - ls -l
+        - echo Entered the build phase...
+        - echo Build and package cloudformation template
+        - aws cloudformation package --template-file template.yml --s3-bucket $BUILD_OUTPUT_BUCKET --output-template-file packaged-template.yml
+        - cat ./packaged-template.yml
+      finally:
+        - echo Build code and package
+    post_build:
+      commands:
+        - echo Build completed on `date`
+        - echo Downloading the cloudformation configuration file
+        - aws s3 cp s3://${S3_CONFIGURATION_FILE_PATH} ./configuration.json
+      finally:
+        - echo Template and Configuration download
 
-artifacts:
-  files:
-    - ./packaged-template.yml
-    - ./configuration.json
+  artifacts:
+    files:
+      - ./packaged-template.yml
+      - ./configuration.json
+      - ./requirements.txt
