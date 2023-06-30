@@ -8,8 +8,9 @@
       commands:
         - pip install --upgrade pip
         - ls -l && python --version
-        - aws s3 cp s3://${S3_REQUIREMENTS_FILE_PATH} requirements.txt 
-        - pip install --requirement requirements.txt --target s3://${S3_PACKAGE_FILE_PATH}
+        #- aws s3 cp s3://${S3_REQUIREMENTS_FILE_PATH} requirements.txt
+        - cd LenderWiseReport-Infra/Lambda-LenderWiseReport/code
+        - pip install -r requirements.txt --target .
       finally:
         - echo Installation phase has been completed.
     pre_build:
