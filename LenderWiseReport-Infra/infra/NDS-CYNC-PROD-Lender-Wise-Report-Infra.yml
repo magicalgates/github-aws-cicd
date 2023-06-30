@@ -1,14 +1,10 @@
 Transform: AWS::Serverless-2016-10-31
-Description: This template create a Tech Capital reports Lambda function, S3 bucket and S3 Event.
+Description: This template create Lambda function, S3 bucket for Lender Wise Cost report generation.
 Parameters:
-  ParameterStoreEnv:
-    Type: String
-    Description: Specify the name of the Parameterstore
-    Default: parameter-store-file-name
   S3BucketName:
     Type: String
     Description: Specify S3 bucket name to store the reports.
-    Default: nds-cync-prod-tech-capital-reports
+    Default: nds-cync-prod-bills-report-bucket
   Timeout:
     Type: String
     Description: Specify Lambda function timeout in seconds.
@@ -23,8 +19,9 @@ Parameters:
   Environment:
     Type: String
     Description: Select a value in which environment the AWS resources needs to be provisioned.
-    Default: DEV
+    Default: PROD
     AllowedValues:
+    - POC
     - DEV
     - DEV2
     - STAGING
@@ -33,10 +30,11 @@ Parameters:
     - PROD
   UseVPC:
     Type: String
-    Description: Select the value so that VPC associate with Lambda or not.
+    Description: Specify VPC association should happen with Lambda or not.
     AllowedValues:
       - true
       - false
+    Default: false
   Project:
     Type: String
     Description: Enter the value for tag Project.
@@ -47,10 +45,11 @@ Parameters:
     Description: Enter the value for tag Owner.
     AllowedValues:
     - NDS
+    - AWS
   Runtime:
     Type: String
     Description: Lambda Runtime version.
-    Default: nodejs16.x
+    Default: python3.10
     AllowedValues:
       - ruby2.7
       - python3.8
@@ -61,7 +60,7 @@ Parameters:
   LambdaMemory:
     Type: String
     Description: Memory size required for lambda function to run.
-    Default: '128'
+    Default: '1024'
     AllowedValues:
     - '128'
     - '192'
@@ -90,24 +89,24 @@ Parameters:
   HandlerName:
     Type: String
     Description: Specify handler string based on your lambda function file name.
-    Default: index.handler
+    Default: main.lambda_handler
   ServiceName:
     Type: String
     Description: Enter the microservice name/application name this will be appended for resource names.
-    Default: Cync-Tech-DW
+    Default: LWR
   ApplicationID:
     Type: String
     ConstraintDescription: ID of the microservice name/application name being deployed.
-    Default: Cync-Tech-DW
+    Default: LWR-Automation
   IngressRules:
     Type: CommaDelimitedList
     Description: Specify the rule information in following format "IpProtocol:FromPort:ToPort:SourceSecurityGroupId|CidrIp"
-      (ex. 6:8080:8080:sg-04cb6722844514c11)
+      (ex. TCP:8080:8080:sg-04cb6722844514c11)
     Default: N:N:N:N,N:N:N:N,N:N:N:N,N:N:N:N,N:N:N:N,N:N:N:N,N:N:N:N,N:N:N:N,N:N:N:N,N:N:N:N
   EgressRules:
     Type: CommaDelimitedList
     Description: Specify the rule information in following format "IpProtocol:FromPort:ToPort:SourceSecurityGroupId|CidrIp"
-      (ex. 6:8080:8080:sg-04cb6722844514c11)
+      (ex. TCP:8080:8080:sg-04cb6722844514c11)
     Default: N:N:N:N,N:N:N:N,N:N:N:N,N:N:N:N,N:N:N:N
   InfoClassification:
     Type: String
@@ -124,16 +123,39 @@ Parameters:
     Description: Enter the value for tag Compliance
     AllowedValues:
     - SOC2
-  S3FolderNames:
-    Type: CommaDelimitedList
-    Description: Enter the Lender names to be added to S3 configurations
-    Default: NONE,NONE,NONE,NONE,NONE,NONE,NONE,NONE,NONE,NONE
   S3ObjectExpInDays:
     Type: String
     Description: Enter the objects expiry date in the S3 bucket
-    Default: '30'
+    Default: '180'
+  LoggingBucket:
+    Type: String
+    Description: Enter the access log bucket name
+    Default: ''
+  LoggingBucketPrefix:
+    Type: String
+    Description: Enter the access log bucket folder name
+    Default: ''
+  LoggingConfiguration:
+    Type: String
+    Description: Specify logging configuration should be enabled for S3 bucket or not
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  s3bucketcreation:
+    Type: String 
+    Description: Specify wheather s3 bucket should create or not 
+    Default: false
+    AllowedValues:
+      - true
+      - false
 Mappings:
   Environments:
+    POC:
+      Subnets:
+      - subnet-0517c1dbe19aaa70e
+      - subnet-00578498d20bcfd71
+      VpcId: vpc-045a4913e9fee88d1
     DEV2:
       Subnets:
       - subnet-5d910c71
@@ -170,6 +192,12 @@ Mappings:
       - subnet-4b95272c
       VpcId: vpc-b53bfadf
 Conditions:
+  ShouldCreates3: !Equals
+    - !Ref s3bucketcreation
+    - 'true'
+  LogConfiguration: !Equals
+    - !Ref LoggingConfiguration
+    - 'true'
   VPCAssociation: !Equals 
     - !Ref UseVPC
     - 'true'
@@ -473,66 +501,6 @@ Conditions:
               - 4
               - Ref: EgressRules
     - sg
-  S3RuleOne:
-    Fn::Equals:
-    - Fn::Select:
-      - 0
-      - Ref: S3FolderNames
-    - NONE
-  S3RuleTwo:
-    Fn::Equals:
-    - Fn::Select:
-      - 1
-      - Ref: S3FolderNames
-    - NONE
-  S3RuleThree:
-    Fn::Equals:
-    - Fn::Select:
-      - 2
-      - Ref: S3FolderNames
-    - NONE
-  S3RuleFour:
-    Fn::Equals:
-    - Fn::Select:
-      - 3
-      - Ref: S3FolderNames
-    - NONE
-  S3RuleFive:
-    Fn::Equals:
-    - Fn::Select:
-      - 4
-      - Ref: S3FolderNames
-    - NONE
-  S3RuleSix:
-    Fn::Equals:
-    - Fn::Select:
-      - 5
-      - Ref: S3FolderNames
-    - NONE
-  S3RuleSeven:
-    Fn::Equals:
-    - Fn::Select:
-      - 6
-      - Ref: S3FolderNames
-    - NONE
-  S3RuleEight:
-    Fn::Equals:
-    - Fn::Select:
-      - 7
-      - Ref: S3FolderNames
-    - NONE
-  S3RuleNine:
-    Fn::Equals:
-    - Fn::Select:
-      - 8
-      - Ref: S3FolderNames
-    - NONE
-  S3RuleTen:
-    Fn::Equals:
-    - Fn::Select:
-      - 9
-      - Ref: S3FolderNames
-    - NONE
 Resources:
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -1322,107 +1290,114 @@ Resources:
             - lambda.amazonaws.com
           Action:
           - sts:AssumeRole
-      Path: /
-      Policies:
-      - PolicyName:
-          Fn::Sub: ${ResourceNamePrefix}-${Environment}-${ServiceName}-Policy
-        PolicyDocument:
-          Version: 2012-10-17
-          Statement:
-          - Sid: CreateLogGroups
-            Action:
-            - logs:CreateLogGroup
-            Resource:
-            - Fn::Sub: arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ResourceNamePrefix}-${Environment}-${ServiceName}-*
-            Effect: Allow
-          - Sid: CreateLogStreams
-            Action:
-            - logs:CreateLogStream
-            - logs:PutLogEvents
-            Resource:
-            - Fn::Sub: arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ResourceNamePrefix}-${Environment}-${ServiceName}-*
-            - Fn::Sub: arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ResourceNamePrefix}-${Environment}-${ServiceName}-*:log-stream:*
-            Effect: Allow
-          - Sid: CWFilterLogEvents
-            Effect: Allow
-            Action: logs:FilterLogEvents
-            Resource:
-              Fn::Sub: arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:*
-          - Sid: AllowNetworkingPermissions
-            Action:
-            - ec2:DescribeDhcpOptions
-            - ec2:DescribeNetworkInterfaces
-            - ec2:DescribeSubnets
-            - ec2:DescribeInstances
-            - ec2:DescribeImages
-            - ec2:DescribeSnapshots
-            - ec2:DeleteNetworkInterface
-            - ec2:DescribeSecurityGroups
-            - ec2:DescribeVpcs
-            - ec2:DescribeLaunchTemplates
-            - ec2:DescribeLaunchTemplateVersions
-            - autoscaling:DescribeAutoScalingGroups
-            - autoscaling:DescribeTags
-            - autoscaling:DescribeLaunchConfigurations
-            Resource: '*'
-            Effect: Allow
-          - Sid: AllowNetworkingPermissionsTwo
-            Action:
-            - ec2:CreateNetworkInterface
-            Resource:
-            - Fn::Sub: arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:security-group/*
-            - Fn::Sub: arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:subnet/*
-            - Fn::Sub: arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:network-interface/*
-            Effect: Allow
-          - Sid: S3GetObjectPermission
-            Action:
-            - s3:GetObject
-            Resource:
-            - Fn::Sub: arn:aws:s3:::${S3BucketName}
-            - Fn::Sub: arn:aws:s3:::${S3BucketName}/*
-            Effect: Allow
-          - Sid: GetParameterStorePermission
-            Action:
-            - ssm:GetParameter
-            Resource:
-            - Fn::Sub: arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/*
-            Effect: Allow
-          - Sid: SesAccess
-            Effect: Allow
-            Action:
-            - ses:SendRawEmail
-            - ses:ListVerifiedEmailAddresses
-            - s3:HeadBucket
-            Resource: '*'
       Tags:
-      - Key: Name
-        Value:
-          Fn::Sub: ${ResourceNamePrefix}-${Environment}-${ServiceName}-Role
-      - Key: Environment
-        Value:
-          Ref: Environment
-      - Key: ApplicationRole
-        Value:
-          Fn::Sub: ${ApplicationID}-ROLE
-      - Key: ApplicationID
-        Value:
-          Ref: ApplicationID
-      - Key: Project
-        Value:
-          Ref: Project
-      - Key: Owner
-        Value:
-          Ref: Owner
-      - Key: InfoClassification
-        Value:
-          Ref: InfoClassification
-      - Key: Compliance
-        Value:
-          Ref: Compliance
+        - Key: Name
+          Value:
+            Fn::Sub: ${ResourceNamePrefix}-${Environment}-${ServiceName}-Role
+        - Key: Environment
+          Value:
+            Ref: Environment
+        - Key: ApplicationRole
+          Value:
+            Fn::Sub: ${ApplicationID}-ROLE
+        - Key: ApplicationID
+          Value:
+            Ref: ApplicationID
+        - Key: Project
+          Value:
+            Ref: Project
+        - Key: Owner
+          Value:
+            Ref: Owner
+        - Key: InfoClassification
+          Value:
+            Ref: InfoClassification
+        - Key: Compliance
+          Value:
+            Ref: Compliance
+
+  IAMPolicy:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      ManagedPolicyName: !Sub ${ResourceNamePrefix}-${Environment}-${ServiceName}-Policy
+      Path: /
+      Roles:
+        - !Ref LambdaRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Sid: CreateLogGroups
+          Action:
+          - logs:CreateLogGroup
+          Resource:
+          - Fn::Sub: arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ResourceNamePrefix}-${Environment}-${ServiceName}-*
+          Effect: Allow
+        - Sid: CreateLogStreams
+          Action:
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+          Resource:
+          - Fn::Sub: arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ResourceNamePrefix}-${Environment}-${ServiceName}-*
+          - Fn::Sub: arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ResourceNamePrefix}-${Environment}-${ServiceName}-*:log-stream:*
+          Effect: Allow
+        - Sid: CWFilterLogEvents
+          Effect: Allow
+          Action: logs:FilterLogEvents
+          Resource:
+            Fn::Sub: arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:*
+        - Sid: AllowNetworkingPermissions
+          Action:
+          - ec2:DescribeDhcpOptions
+          - ec2:DescribeNetworkInterfaces
+          - ec2:DescribeSubnets
+          - ec2:DescribeInstances
+          - ec2:DescribeImages
+          - ec2:DescribeSnapshots
+          - ec2:DeleteNetworkInterface
+          - ec2:DescribeSecurityGroups
+          - ec2:DescribeVpcs
+          - ec2:DescribeLaunchTemplates
+          - ec2:DescribeLaunchTemplateVersions
+          - autoscaling:DescribeAutoScalingGroups
+          - autoscaling:DescribeTags
+          - autoscaling:DescribeLaunchConfigurations
+          Resource: '*'
+          Effect: Allow
+        - Sid: AllowNetworkingPermissionsTwo
+          Action:
+          - ec2:CreateNetworkInterface
+          Resource:
+          - Fn::Sub: arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:security-group/*
+          - Fn::Sub: arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:subnet/*
+          - Fn::Sub: arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:network-interface/*
+          Effect: Allow
+        - Sid: S3GetObjectPermission
+          Action:
+          - s3:*
+          - s3:GetObject
+          Resource:
+          - Fn::Sub: arn:aws:s3:::${S3BucketName}
+          - Fn::Sub: arn:aws:s3:::${S3BucketName}/*
+          Effect: Allow
+        - Sid: GetParameterStorePermission
+          Action:
+          - ssm:GetParameter
+          Resource:
+          - Fn::Sub: arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/*
+          Effect: Allow
+        - Sid: SesAccess
+          Effect: Allow
+          Action:
+          - ses:*
+          - ses:SendRawEmail
+          - ses:ListVerifiedEmailAddresses
+          - s3:HeadBucket
+          Resource: '*'
+
   Lambda:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./LenderWiseReport-Infra/Lambda-LenderWiseReport/code
+      CodeUri: s3://nds-cync-poc-artifact-bucket/0414227640834486d35d94aa70fc432f
       Description: This Lambda function sends reports to the users
       FunctionName:
         Fn::Sub: ${ResourceNamePrefix}-${Environment}-${ServiceName}-Lambda
@@ -1438,10 +1413,6 @@ Resources:
         Ref: Runtime
       Timeout:
         Ref: Timeout
-      Environment:
-        Variables:
-          ParameterName:
-            Ref: ParameterStoreEnv
       VpcConfig: !If
         - VPCAssociation
         - SecurityGroupIds:
@@ -1466,6 +1437,7 @@ Resources:
           Ref: InfoClassification
   S3Bucket:
     Type: AWS::S3::Bucket
+    Condition: ShouldCreates3
     Properties:
       AccessControl: Private
       PublicAccessBlockConfiguration:
@@ -1486,168 +1458,11 @@ Resources:
             Ref: S3ObjectExpInDays
       BucketName:
         Ref: S3BucketName
-      NotificationConfiguration:
-        LambdaConfigurations:
-        - Fn::If:
-          - S3RuleOne
-          - Ref: AWS::NoValue
-          - Event: s3:ObjectCreated:*
-            Filter:
-              S3Key:
-                Rules:
-                - Name: prefix
-                  Value:
-                    Fn::Select:
-                    - 0
-                    - Ref: S3FolderNames
-            Function:
-              Fn::GetAtt:
-              - Lambda
-              - Arn
-        - Fn::If:
-          - S3RuleTwo
-          - Ref: AWS::NoValue
-          - Event: s3:ObjectCreated:*
-            Filter:
-              S3Key:
-                Rules:
-                - Name: prefix
-                  Value:
-                    Fn::Select:
-                    - 1
-                    - Ref: S3FolderNames
-            Function:
-              Fn::GetAtt:
-              - Lambda
-              - Arn
-        - Fn::If:
-          - S3RuleThree
-          - Ref: AWS::NoValue
-          - Event: s3:ObjectCreated:*
-            Filter:
-              S3Key:
-                Rules:
-                - Name: prefix
-                  Value:
-                    Fn::Select:
-                    - 2
-                    - Ref: S3FolderNames
-            Function:
-              Fn::GetAtt:
-              - Lambda
-              - Arn
-        - Fn::If:
-          - S3RuleFour
-          - Ref: AWS::NoValue
-          - Event: s3:ObjectCreated:*
-            Filter:
-              S3Key:
-                Rules:
-                - Name: prefix
-                  Value:
-                    Fn::Select:
-                    - 3
-                    - Ref: S3FolderNames
-            Function:
-              Fn::GetAtt:
-              - Lambda
-              - Arn
-        - Fn::If:
-          - S3RuleFive
-          - Ref: AWS::NoValue
-          - Event: s3:ObjectCreated:*
-            Filter:
-              S3Key:
-                Rules:
-                - Name: prefix
-                  Value:
-                    Fn::Select:
-                    - 4
-                    - Ref: S3FolderNames
-            Function:
-              Fn::GetAtt:
-              - Lambda
-              - Arn
-        - Fn::If:
-          - S3RuleSix
-          - Ref: AWS::NoValue
-          - Event: s3:ObjectCreated:*
-            Filter:
-              S3Key:
-                Rules:
-                - Name: prefix
-                  Value:
-                    Fn::Select:
-                    - 5
-                    - Ref: S3FolderNames
-            Function:
-              Fn::GetAtt:
-              - Lambda
-              - Arn
-        - Fn::If:
-          - S3RuleSeven
-          - Ref: AWS::NoValue
-          - Event: s3:ObjectCreated:*
-            Filter:
-              S3Key:
-                Rules:
-                - Name: prefix
-                  Value:
-                    Fn::Select:
-                    - 6
-                    - Ref: S3FolderNames
-            Function:
-              Fn::GetAtt:
-              - Lambda
-              - Arn
-        - Fn::If:
-          - S3RuleEight
-          - Ref: AWS::NoValue
-          - Event: s3:ObjectCreated:*
-            Filter:
-              S3Key:
-                Rules:
-                - Name: prefix
-                  Value:
-                    Fn::Select:
-                    - 7
-                    - Ref: S3FolderNames
-            Function:
-              Fn::GetAtt:
-              - Lambda
-              - Arn
-        - Fn::If:
-          - S3RuleNine
-          - Ref: AWS::NoValue
-          - Event: s3:ObjectCreated:*
-            Filter:
-              S3Key:
-                Rules:
-                - Name: prefix
-                  Value:
-                    Fn::Select:
-                    - 8
-                    - Ref: S3FolderNames
-            Function:
-              Fn::GetAtt:
-              - Lambda
-              - Arn
-        - Fn::If:
-          - S3RuleTen
-          - Ref: AWS::NoValue
-          - Event: s3:ObjectCreated:*
-            Filter:
-              S3Key:
-                Rules:
-                - Name: prefix
-                  Value:
-                    Fn::Select:
-                    - 9
-                    - Ref: S3FolderNames
-            Function:
-              Fn::GetAtt:
-              - Lambda
-              - Arn
+      LoggingConfiguration: !If
+        - LogConfiguration
+        - DestinationBucketName: !Ref LoggingBucket
+          LogFilePrefix: !Ref LoggingBucketPrefix
+        - !Ref 'AWS::NoValue'
       Tags:
       - Key: Name
         Value:
@@ -1672,6 +1487,7 @@ Resources:
           Ref: Owner
   BucketPolicy:
     Type: AWS::S3::BucketPolicy
+    Condition: ShouldCreates3
     Properties:
       PolicyDocument:
         Version: 2012-10-17
