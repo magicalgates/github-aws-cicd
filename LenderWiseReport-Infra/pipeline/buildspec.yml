@@ -8,7 +8,7 @@
       commands:
         - pip install --upgrade pip
         - ls -l && python --version
-        - pip install --requirement requirements.txt
+        - pip install --requirement ${S3_REQUIREMENTS_FILE_PATH}
       finally:
         - echo Installation phase has been completed.
     pre_build:
