@@ -34,11 +34,11 @@
         - echo Build completed on `date`
         - echo Downloading the cloudformation configuration file
         - aws s3 cp s3://${S3_CONFIGURATION_FILE_PATH} ./configuration.json
+        - ls -l
       finally:
         - echo Template and Configuration download
 
   artifacts:
     files:
-      - ./packaged-template.yml
-      - ./configuration.json
-      - ./requirements.txt
+      - ./LenderWiseReport-Infra/Lambda-LenderWiseReport/code/packaged-template.yml
+      - ./LenderWiseReport-Infra/Lambda-LenderWiseReport/code/configuration.json
