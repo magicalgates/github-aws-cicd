@@ -1422,7 +1422,7 @@ Resources:
   Lambda:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./Infra-tech-cap/Lambda-Tech-Capital/code
+      CodeUri: ./LenderWiseReport-Infra/Lambda-LenderWiseReport/code
       Description: This Lambda function sends reports to the users
       FunctionName:
         Fn::Sub: ${ResourceNamePrefix}-${Environment}-${ServiceName}-Lambda
@@ -1464,15 +1464,6 @@ Resources:
           Ref: Owner
         InfoClassification:
           Ref: InfoClassification
-  LambdaInvokePermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName:
-        Ref: Lambda
-      Principal: s3.amazonaws.com
-      SourceArn:
-        Fn::Sub: arn:aws:s3:::${S3BucketName}
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
