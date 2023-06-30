@@ -59,13 +59,13 @@ Parameters:
       - UAT
 
   ServiceName:
-    Default: Cync-Tech-DW
+    Default: LWR
     Type: String
     Description: Name of the application/service that is provisioned
 
   ApplicationId:
     Type: String
-    Default: Cync-Tech-DW
+    Default: LWR-Automation
     ConstraintDescription: Identifier for the application/service
 
   Project:
@@ -77,9 +77,10 @@ Parameters:
 
   Owner:
     Type: String
-    Default: NDS
+    Default: AWS
     AllowedValues:
       - NDS
+      - AWS
     Description: Enter the value for tag Owner
 
   InfoClassification:
