@@ -125,6 +125,11 @@ Parameters:
     Description: Enter the S3 Arn of the buildspec file.
     Default: nds-cync-dev-cloudformation-templates/Cync-Search/buildspec.yml
 
+  S3RequirementsPath:
+    Type: String
+    Description: Enter the full S3 Key of the Requirement.txt file. Refer the default value.
+    Default: nds-cync-dev-cloudformation-templates/Cync-Search/requirement.txt
+
   CodeBuildImage:
     Type: String
     Description: Enter the full S3 Key of the serverless template. Refer the default value.
@@ -282,6 +287,9 @@ Resources:
           -
             Name: S3_CONFIGURATION_FILE_PATH
             Value: !Ref S3ConfigurationPath
+          -
+            Name: S3_REQUIREMENTS_FILE_PATH
+            Value: !Ref S3RequirementsPath
       Cache:
         Type: S3
         Location: !Sub ${BuildArtifactsBucket}/codebuild-cache
