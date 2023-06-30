@@ -8,8 +8,8 @@
       commands:
         - pip install --upgrade pip
         - ls -l && python --version
-        - aws s3 cp s3://${S3_REQUIREMENTS_FILE_PATH} requirements.txt --target .
-        - pip install --requirement requirements.txt
+        - aws s3 cp s3://${S3_REQUIREMENTS_FILE_PATH} requirements.txt 
+        - pip install --requirement requirements.txt --target .
       finally:
         - echo Installation phase has been completed.
     pre_build:
