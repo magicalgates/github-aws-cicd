@@ -12,12 +12,16 @@
         "Owner": "AWS",
         "InfoClassification": "Internal",
         "ServiceName": "LWR",
-        "S3BucketName": "nds-cync-prod-bills-report-bucket",
+        "S3BucketName": "yashdemobucket007",
         "S3ObjectExpInDays": "180",
         "LoggingBucket": "cloudformationmanageduploadinfra-accesslogsbucket-1b524uuq9oq4d",
         "LoggingBucketPrefix": "",
         "LoggingConfiguration": "false",
-        "s3bucketcreation": "false"
+        "S3BucketCreation": "false",
+        "CompatibleArchitecture": "x86_64",
+        "CompatibleRuntime": "python3.10",
+        "BucketName": "yashdemobucket007",
+        "Bucketkey": "LenderWiseReport-Infra/LenderWiseReportPackage.zip"
     },
     "Tags": {
         "Name": "NDS-CYNC-PROD-LenderWiseReport-Automation-Lambda-Stk",
