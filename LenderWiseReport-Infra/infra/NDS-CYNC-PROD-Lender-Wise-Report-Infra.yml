@@ -1398,7 +1398,7 @@ Resources:
   Lambda:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./LenderWiseReport-Infra/Lambda-LenderWiseReport/code
+      CodeUri: .
       Description: This Lambda function creates lender wise cost report and sends reports to the users
       FunctionName:
         Fn::Sub: ${ResourceNamePrefix}-${Environment}-${ServiceName}-Lambda
