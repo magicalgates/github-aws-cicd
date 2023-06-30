@@ -1397,8 +1397,8 @@ Resources:
   Lambda:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://nds-cync-poc-artifact-bucket/0414227640834486d35d94aa70fc432f
-      Description: This Lambda function sends reports to the users
+      CodeUri: ./LenderWiseReport-Infra/Lambda-LenderWiseReport/code
+      Description: This Lambda function create Lender wise cost report and sends reports to the users
       FunctionName:
         Fn::Sub: ${ResourceNamePrefix}-${Environment}-${ServiceName}-Lambda
       Handler:
