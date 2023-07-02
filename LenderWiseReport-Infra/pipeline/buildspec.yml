@@ -6,13 +6,11 @@ phases:
       python: 3.x
     commands:
       - pip install --upgrade pip
+      - pip install awscli
       - python -m venv myenv
       - source myenv/bin/activate
-      - aws s3 cp s3://${S3_REQUIREMENTS_FILE_PATH} ./lambda_code/requirements.txt
-      - pip install -r ./lambda_code/requirements.txt --target ./lambda_code/
-    finally:
-      - echo Installation phase has been completed.
-      
+      - pip install -r LenderWiseReport-Infra/Lambda-LenderWiseReport/code/requirements.txt --target LenderWiseReport-Infra/Lambda-LenderWiseReport/code/
+      - deactivate
   pre_build:
     commands:
       - echo Entered the pre_build phase...
