@@ -8,6 +8,10 @@ phases:
       - pip install --upgrade pip
       - pip install awscli
       - pip install pandas numpy openpyxl -t LenderWiseReport-Infra/Lambda-LenderWiseReport/code/
+      - cd LenderWiseReport-Infra/Lambda-LenderWiseReport/code/
+      - pip uninstall numpy
+      - pip install numpy
+      - cd ../../../
   pre_build:
     commands:
       - echo Entered the pre_build phase...
