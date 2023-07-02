@@ -10,7 +10,6 @@ phases:
       - source myenv/bin/activate
       - aws s3 cp s3://${S3_REQUIREMENTS_FILE_PATH} ./lambda_code/requirements.txt
       - pip install -r ./lambda_code/requirements.txt --target ./lambda_code/
-      - deactivate
     finally:
       - echo Installation phase has been completed.
       
