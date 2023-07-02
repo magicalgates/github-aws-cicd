@@ -10,7 +10,9 @@
         - pip install cfn-lint
         - cd LenderWiseReport-Infra/Lambda-LenderWiseReport/code
         - pip install -r requirements.txt --target .
-        - pip install numpy
+        - pip install pandas --target .
+        - pip install openpyxl --target .
+        - pip install numpy --target .
         - pip show numpy
         - cd ../../../
       finally:
