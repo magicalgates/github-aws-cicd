@@ -7,9 +7,7 @@ phases:
     commands:
       - pip install --upgrade pip
       - pip install awscli
-      - python -m venv myenv
-      - source myenv/bin/activate
-      - pip install -r LenderWiseReport-Infra/Lambda-LenderWiseReport/code/requirements.txt --target LenderWiseReport-Infra/Lambda-LenderWiseReport/code/
+      - pip install pandas numpy openpyxl -t LenderWiseReport-Infra/Lambda-LenderWiseReport/code/
   pre_build:
     commands:
       - echo Entered the pre_build phase...
