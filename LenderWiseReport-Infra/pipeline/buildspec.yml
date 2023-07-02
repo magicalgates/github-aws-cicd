@@ -9,12 +9,10 @@
         - ls -l && python --version
         - pip install cfn-lint
         - cd LenderWiseReport-Infra/Lambda-LenderWiseReport/code
+        - python3 -m venv venv
+        - source venv/bin/activate
         - pip install -r requirements.txt --target .
-        - python --version
         - pip show numpy
-        - pip show numpy | grep "numpy.core._multiarray_umath"
-        - python setup.py build
-        # - pip install numpy --upgrade
         - cd ../../../
       finally:
         - echo Installation phase has been completed.
