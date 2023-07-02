@@ -1,49 +1,47 @@
-  version: 0.2
+version: 0.2
 
-  phases:
-    install:
-      runtime-versions:
-        python: 3.x
-      commands:
-        - pip install --upgrade pip
-        - ls -l && python --version
-        - pip install cfn-lint
-        - cd LenderWiseReport-Infra/Lambda-LenderWiseReport/code
-        - pip install -r requirements.txt --target .
-        - pip install pandas --target .
-        - pip install openpyxl --target .
-        - pip install numpy --target .
-        - pip show numpy
-        - cd ../../../
-      finally:
-        - echo Installation phase has been completed.
-    pre_build:
-      commands:
-        - echo Entered the pre_build phase...
-        - echo Downloading the serverless template
-        - aws s3 cp s3://${S3_TEMPLATE_FILE_PATH} ./template.yml
-      finally:
-        - echo Template and Configuration download
-    build:
-      commands:
-        - ls -l
-        - echo Entered the build phase...
-        - echo Build and package cloudformation template
-        - aws cloudformation package --template-file template.yml --s3-bucket $BUILD_OUTPUT_BUCKET --output-template-file packaged-template.yml
-        - cat ./packaged-template.yml
-      finally:
-        - echo Build code and package
-    post_build:
-      commands:
-        - echo Build completed on `date`
-        - echo Downloading the cloudformation configuration file
-        - aws s3 cp s3://${S3_CONFIGURATION_FILE_PATH} ./configuration.json
-      finally:
-        - echo Template and Configuration download
-        - ls -l
-        - pwd
+phases:
+  install:
+    runtime-versions:
+      python: 3.x
+    commands:
+      - pip install --upgrade pip
+      - python -m venv myenv
+      - source myenv/bin/activate
+      - aws s3 cp s3://${S3_REQUIREMENTS_FILE_PATH} ./lambda_code/requirements.txt
+      - pip install -r ./lambda_code/requirements.txt --target ./lambda_code/
+      - deactivate
+    finally:
+      - echo Installation phase has been completed.
+      
+  pre_build:
+    commands:
+      - echo Entered the pre_build phase...
+      - echo Downloading the serverless template
+      - aws s3 cp s3://${S3_TEMPLATE_FILE_PATH} ./template.yml
+    finally:
+      - echo Template and Configuration download
 
-  artifacts:
-    files:
-      - ./packaged-template.yml
-      - ./configuration.json
+  build:
+    commands:
+      - echo Entered the build phase...
+      - echo Build and package cloudformation template
+      - aws cloudformation package --template-file template.yml --s3-bucket $BUILD_OUTPUT_BUCKET --output-template-file packaged-template.yml
+      - cat ./packaged-template.yml
+    finally:
+      - echo Build code and package
+
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Downloading the cloudformation configuration file
+      - aws s3 cp s3://${S3_CONFIGURATION_FILE_PATH} ./configuration.json
+    finally:
+      - echo Template and Configuration download
+      - ls -l
+      - pwd
+
+artifacts:
+  files:
+    - ./packaged-template.yml
+    - ./configuration.json
