@@ -9,9 +9,8 @@
         - ls -l && python --version
         - pip install cfn-lint
         - cd LenderWiseReport-Infra/Lambda-LenderWiseReport/code
-        - python3 -m venv venv
-        - source venv/bin/activate
         - pip install -r requirements.txt --target .
+        - pip install numpy
         - pip show numpy
         - cd ../../../
       finally:
