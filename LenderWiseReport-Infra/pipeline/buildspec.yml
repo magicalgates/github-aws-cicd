@@ -3,14 +3,14 @@
   phases:
     install:
       runtime-versions:
-        python: 3.11
+        python: 3.x
       commands:
         - pip install --upgrade pip
         - ls -l && python --version
         - pip install cfn-lint
         - cd LenderWiseReport-Infra/Lambda-LenderWiseReport/code
         - pip install -r requirements.txt --target .
-        # - pip install numpy --upgrade
+        - pip install numpy --upgrade
         - cd ../../../
       finally:
         - echo Installation phase has been completed.
