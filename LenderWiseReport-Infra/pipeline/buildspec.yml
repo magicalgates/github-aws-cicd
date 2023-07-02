@@ -10,7 +10,6 @@ phases:
       - python -m venv myenv
       - source myenv/bin/activate
       - pip install -r LenderWiseReport-Infra/Lambda-LenderWiseReport/code/requirements.txt --target LenderWiseReport-Infra/Lambda-LenderWiseReport/code/
-      - deactivate
   pre_build:
     commands:
       - echo Entered the pre_build phase...
