@@ -12,7 +12,6 @@ phases:
       - pip uninstall numpy
       - pip install numpy
       - cd ../../../
-      - echo "NumPy installation path: $(python -c 'import numpy; print(numpy.__file__)')"
 
   pre_build:
     commands:
