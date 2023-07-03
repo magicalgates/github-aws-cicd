@@ -6,7 +6,8 @@ phases:
       python: 3.x
     commands:
       - pip install --upgrade pip
-      - pip install -r requirements.txt -t LenderWiseReport-Infra/Lambda-LenderWiseReport/code/
+      - aws s3 cp s3://${S3_REQUIREMENTS_FILE_PATH} requirements.txt
+      - pip install --requirement requirements.txt -t LenderWiseReport-Infra/Lambda-LenderWiseReport/code/
       # - cd LenderWiseReport-Infra/Lambda-LenderWiseReport/code/
       # - pip install numpy
       # - cd ../../../
