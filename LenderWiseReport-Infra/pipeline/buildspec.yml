@@ -6,12 +6,10 @@ phases:
       python: 3.x
     commands:
       - pip install --upgrade pip
-      - pip install awscli
-      - pip install pandas numpy openpyxl -t LenderWiseReport-Infra/Lambda-LenderWiseReport/code/
-      - cd LenderWiseReport-Infra/Lambda-LenderWiseReport/code/
-      - pip uninstall numpy
-      - pip install numpy
-      - cd ../../../
+      - pip install -r requirements.txt -t LenderWiseReport-Infra/Lambda-LenderWiseReport/code/
+      # - cd LenderWiseReport-Infra/Lambda-LenderWiseReport/code/
+      # - pip install numpy
+      # - cd ../../../
 
   pre_build:
     commands:
@@ -37,8 +35,8 @@ phases:
       - aws s3 cp s3://${S3_CONFIGURATION_FILE_PATH} ./configuration.json
     finally:
       - echo "Template and Configuration download"
-      - ls -l
-      - pwd
+      # - ls -l
+      # - pwd
 
 artifacts:
   files:
