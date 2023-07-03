@@ -8,31 +8,36 @@ phases:
       - pip install --upgrade pip
       - pip install awscli
       - pip install pandas numpy openpyxl -t LenderWiseReport-Infra/Lambda-LenderWiseReport/code/
+      - cd LenderWiseReport-Infra/Lambda-LenderWiseReport/code/
+      - pip uninstall numpy
+      - pip install numpy
+      - cd ../../../
       - echo "NumPy installation path: $(python -c 'import numpy; print(numpy.__file__)')"
+
   pre_build:
     commands:
-      - echo Entered the pre_build phase...
-      - echo Downloading the serverless template
+      - echo "Entered the pre_build phase..."
+      - echo "Downloading the serverless template"
       - aws s3 cp s3://${S3_TEMPLATE_FILE_PATH} ./template.yml
     finally:
-      - echo Template and Configuration download
+      - echo "Template and Configuration download"
 
   build:
     commands:
-      - echo Entered the build phase...
-      - echo Build and package cloudformation template
+      - echo "Entered the build phase..."
+      - echo "Build and package cloudformation template"
       - aws cloudformation package --template-file template.yml --s3-bucket $BUILD_OUTPUT_BUCKET --output-template-file packaged-template.yml
       - cat ./packaged-template.yml
     finally:
-      - echo Build code and package
+      - echo "Build code and package"
 
   post_build:
     commands:
-      - echo Build completed on `date`
-      - echo Downloading the cloudformation configuration file
+      - echo "Build completed on $(date)"
+      - echo "Downloading the cloudformation configuration file"
       - aws s3 cp s3://${S3_CONFIGURATION_FILE_PATH} ./configuration.json
     finally:
-      - echo Template and Configuration download
+      - echo "Template and Configuration download"
       - ls -l
       - pwd
 
