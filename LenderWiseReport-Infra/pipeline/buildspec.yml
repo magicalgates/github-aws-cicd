@@ -8,8 +8,6 @@ phases:
       - pip install --upgrade pip
       - pip install awscli
       - pip install pandas numpy openpyxl -t LenderWiseReport-Infra/Lambda-LenderWiseReport/code/
-      - cd LenderWiseReport-Infra/Lambda-LenderWiseReport/code/
-      - cd ../../../
       - echo "NumPy installation path: $(python -c 'import numpy; print(numpy.__file__)')"
   pre_build:
     commands:
