@@ -247,20 +247,20 @@ Resources:
           - !Ref SecurityGroupId
         SubnetIds: !FindInMap [Environments, !Ref EnvironmentName, Subnets]
       Tags:
-        - Key: Name
-          Value: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Lambda'
-        - Key: Environment
-          Value: !Ref EnvironmentName
-        - Key: Owner
-          Value: !Ref Owner
-        - Key: Project
-          Value: !Ref ResourceNamePrefix
-        - Key: ApplicationID
-          Value: !Ref ApplicationID
-        - Key: ApplicationRole
-          Value: !Sub '${ApplicationID}-FUNC'
-        - Key: Compliance
-          Value: !Ref Compliance
-        - Key: InfoClassification
-          Value: !Ref InfoClassification
+        Name:
+          Fn::Sub: '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Lambda'
+        ApplicationRole:
+          Fn::Sub: ${ApplicationID}-FUNC
+        Environment:
+          Ref: Environment
+        ApplicationID:
+          Ref: ApplicationID
+        Project:
+          Ref: Project
+        Owner:
+          Ref: Owner
+        InfoClassification:
+          Ref: InfoClassification
+        Compliance:
+          Ref: !Ref Compliance
 
