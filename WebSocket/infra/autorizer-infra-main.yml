@@ -223,7 +223,7 @@ Resources:
   AuthorizerLambda:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./LenderWiseReport-Infra/Lambda-LenderWiseReport/code
+      CodeUri: ./WebSocket/code
       Description: This Lambda function creates Authorizer lambda.
       FunctionName:
         Fn::Sub: '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Lambda'
