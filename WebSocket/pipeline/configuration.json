@@ -12,7 +12,8 @@
         "Owner": "NDS",
         "InfoClassification": "Internal",
         "ServiceName": "WEBSOCKET",
-        "SecurityGroupId": "sg-0ac912c312e2a477a"
+        "SecurityGroupId": "sg-0ac912c312e2a477a",
+        "S3BucketName": "yashdemobucket007"
     },
     "Tags": {
         "Name": "NDS-CYNC-Staging-Websocket-Authorizer-Lambda-Stk",
