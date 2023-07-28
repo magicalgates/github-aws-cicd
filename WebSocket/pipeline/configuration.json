@@ -4,7 +4,7 @@
         "AuthorizerUrl": "https://staging.cyncsoftware.com/",
         "ResourceNamePrefix": "NDS-CYNC",
         "EnvironmentName": "POC",
-        "Runtime": "python3.10",
+        "Runtime": "nodejs16.x",
         "LambdaMemory": "128",
         "AuthorizerHandler": "index.handler",
         "ApplicationID": "WEBSOCKET-Authorizer",
