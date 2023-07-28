@@ -1,0 +1,27 @@
+{
+    "Parameters": {
+        "Timeout": "120",
+        "AuthorizerUrl": "https://staging.cyncsoftware.com/",
+        "ResourceNamePrefix": "NDS-CYNC",
+        "EnvironmentName": "POC",
+        "Runtime": "python3.10",
+        "LambdaMemory": "128",
+        "AuthorizerHandler": "index.handler",
+        "ApplicationID": "WEBSOCKET-Authorizer",
+        "Project": "NDS-CYNC",
+        "Owner": "NDS",
+        "InfoClassification": "Internal",
+        "ServiceName": "WEBSOCKET",
+        "SecurityGroupId": "sg-0ac912c312e2a477a"
+    },
+    "Tags": {
+        "Name": "NDS-CYNC-Staging-Websocket-Authorizer-Lambda-Stk",
+        "Owner": "NDS",
+        "Environment": "Staging",
+        "Project": "NDS-CYNC",
+        "InfoClassification": "Internal",
+        "ApplicationID": "WEBSOCKET-Authorizer",
+        "ApplicationRole": "Authorizer-CFN",
+        "Automation": "TRUE"
+    }
+}
