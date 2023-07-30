@@ -226,42 +226,27 @@ Resources:
     Properties:
       CodeUri: ./WebSocket/WebSocket-Authorizer-Code/Code
       Description: This Lambda function creates Authorizer lambda.
-      FunctionName:
-        Fn::Sub: '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Lambda'
-      Handler:
-        Ref: AuthorizerHandler
-      MemorySize:
-        Ref: LambdaMemory
-      Role:
-        Fn::GetAtt:
-        - AuthorizerLambdaRole
-        - Arn
-      Runtime:
-        Ref: Runtime
-      Timeout:
-        Ref: Timeout
+      FunctionName: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Lambda'
+      Handler: !Ref AuthorizerHandler  
+      MemorySize: !Ref LambdaMemory    
+      Role: !GetAtt AuthorizerLambdaRole.Arn
+      Runtime: !Ref Runtime
+      Timeout: !Ref Timeout
       Environment:
         Variables:
-          authUrl: !Ref AuthorizerUrl
+          authUrl: !Ref AuthorizerUrl   
       VpcConfig:
         SecurityGroupIds:
-          - !Ref SecurityGroupId
+          - !Ref SecurityGroupId        
         SubnetIds: !FindInMap [Environments, !Ref EnvironmentName, Subnets]
       Tags:
-        Name:
-          Fn::Sub: '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Lambda'
-        ApplicationRole:
-          Fn::Sub: ${ApplicationID}-FUNC
-        Environment:
-          Ref: Environment
-        ApplicationID:
-          Ref: ApplicationID
-        Project:
-          Ref: Project
-        Owner:
-          Ref: Owner
-        InfoClassification:
-          Ref: InfoClassification
-        Compliance:
-          Ref: !Ref Compliance
+        Name: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Lambda'
+        ApplicationRole: !Sub '${ApplicationID}-FUNC'
+        Environment: !Ref Environment
+        ApplicationID: !Ref ApplicationID
+        Project: !Ref Project
+        Owner: !Ref Owner
+        InfoClassification: !Ref InfoClassification
+        Compliance: !Ref Compliance
+
 
