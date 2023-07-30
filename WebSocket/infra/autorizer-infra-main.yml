@@ -5,10 +5,6 @@ Parameters:
     Type: String
     Default: NDS-CYNC
     Description: Prefix for the name of the resource
-  S3BucketName:
-    Type: String
-    Description: Specify S3 bucket name to store the templates.
-    Default: nds-cync-prod-..
   Project:
     Type: String
     Description: Enter a value for tag Project
@@ -206,13 +202,6 @@ Resources:
                     arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Lambda
                   - !Sub >-
                     arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Lambda:*
-              - Sid: S3GetObjectPermission
-                Action:
-                  - 's3:GetObject'
-                Resource:
-                  - !Sub 'arn:aws:s3:::${S3BucketName}'
-                  - !Sub 'arn:aws:s3:::${S3BucketName}/*'
-                Effect: Allow
           PolicyName: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Policy'
       Tags:
         - Key: Name
