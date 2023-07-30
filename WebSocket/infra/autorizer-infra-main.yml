@@ -177,6 +177,7 @@ Resources:
                   - 'ec2:DescribeSecurityGroups'
                   - 'ec2:DescribeSubnets'
                   - 'ec2:DescribeVpcs'
+                  - 's3:HeadBucket'
                 Resource: '*'
               - Action:
                   - 'ec2:CreateNetworkInterface'
@@ -205,6 +206,13 @@ Resources:
                     arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Lambda
                   - !Sub >-
                     arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Lambda:*
+              - Sid: S3GetObjectPermission
+                Action:
+                  - 's3:GetObject'
+                Resource:
+                  - !Sub 'arn:aws:s3:::${S3BucketName}'
+                  - !Sub 'arn:aws:s3:::${S3BucketName}/*'
+                Effect: Allow
           PolicyName: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Policy'
       Tags:
         - Key: Name
