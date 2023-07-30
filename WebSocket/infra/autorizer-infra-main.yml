@@ -242,7 +242,7 @@ Resources:
       Tags:
         Name: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Lambda'
         ApplicationRole: !Sub '${ApplicationID}-FUNC'
-        Environment: !Ref Environment
+        Environment: !Ref EnvironmentName
         ApplicationID: !Ref ApplicationID
         Project: !Ref Project
         Owner: !Ref Owner
