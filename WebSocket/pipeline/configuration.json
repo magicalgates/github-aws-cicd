@@ -12,12 +12,13 @@
         "Owner": "NDS",
         "InfoClassification": "Internal",
         "ServiceName": "WEBSOCKET",
-        "SecurityGroupId": "sg-0ac912c312e2a477a"
+        "SecurityGroupId": "sg-0ac912c312e2a477a",
+        "Compliance": "SOC2"
     },
     "Tags": {
         "Name": "NDS-CYNC-Staging-Websocket-Authorizer-Lambda-Stk",
         "Owner": "NDS",
-        "Environment": "Staging",
+        "Environment": "POC",
         "Project": "NDS-CYNC",
         "InfoClassification": "Internal",
         "ApplicationID": "WEBSOCKET-Authorizer",
