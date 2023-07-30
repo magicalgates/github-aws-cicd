@@ -13,7 +13,7 @@
         "InfoClassification": "Internal",
         "ServiceName": "WEBSOCKET",
         "SecurityGroupId": "sg-0ac912c312e2a477a",
-        "S3BucketName": "yashdemobucket007"
+        "S3BucketName": "nds-cync-poc-artifact-bucket"
     },
     "Tags": {
         "Name": "NDS-CYNC-Staging-Websocket-Authorizer-Lambda-Stk",
