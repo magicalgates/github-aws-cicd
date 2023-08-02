@@ -12,19 +12,20 @@ phases:
       - pip install cfn-lint
     finally:
       - echo Installation phase has been completed.s
-  # pre_build:
-  #   commands:
-  #     - echo Entered the pre_build phase...
-  #     - echo Downloading the serverless template
-  #     # - cd WebSocket/infra/
-  #   finally:
-  #     - echo Template and Configuration download
+  pre_build:
+    commands:
+      - echo Entered the pre_build phase...
+      - echo Downloading the serverless template
+      - cp WebSocket/infra/autorizer-infra-main.yml .
+      - ls
+    finally:
+      - echo Template and Configuration download
   build:
     commands:
       - ls -l
       - echo Entered the build phase...
       - echo Build and package cloudformation template
-      - aws cloudformation package --template-file WebSocket/infra/autorizer-infra-main.yml --s3-bucket $BUILD_OUTPUT_BUCKET --output-template-file packaged-template.yml
+      - aws cloudformation package --template-file autorizer-infra-main.yml --s3-bucket $BUILD_OUTPUT_BUCKET --output-template-file packaged-template.yml
       - cat ./packaged-template.yml
     finally:
       - echo Build code and package
