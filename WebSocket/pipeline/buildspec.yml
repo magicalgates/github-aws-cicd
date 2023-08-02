@@ -43,4 +43,4 @@ phases:
 artifacts:
   files:
     - ./WebSocket/infra/packaged-template.yml
-    - ./configuration.json
+    - ./WebSocket/pipeline/configuration.json
