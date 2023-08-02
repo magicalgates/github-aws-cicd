@@ -11,7 +11,6 @@ phases:
       - pwd
       - cd WebSocket/Code/
       - pwd
-      - aws s3 cp s3://${S3_REQUIREMENTS_FILE_PATH} package.json
       - npm install
       - cd ../../
       - pwd
@@ -22,7 +21,7 @@ phases:
     commands:
       - echo Entered the pre_build phase...
       - echo Downloading the serverless template
-      - aws s3 cp s3://${S3_TEMPLATE_FILE_PATH} ./template.yml
+      # - aws s3 cp s3://${S3_TEMPLATE_FILE_PATH} ./template.yml
     finally:
       - echo Template and Configuration download
   build:
@@ -30,7 +29,7 @@ phases:
       - ls -l
       - echo Entered the build phase...
       - echo Build and package cloudformation template
-      - aws cloudformation package --template-file template.yml --s3-bucket $BUILD_OUTPUT_BUCKET --output-template-file packaged-template.yml
+      - aws cloudformation package --template-file s3://${S3_TEMPLATE_FILE_PATH} --s3-bucket $BUILD_OUTPUT_BUCKET --output-template-file packaged-template.yml
       - cat ./packaged-template.yml
     finally:
       - echo Build code and package
