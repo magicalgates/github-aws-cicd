@@ -27,9 +27,14 @@ phases:
   build:
     commands:
       - ls -l
+      - cd /WebSocket
+      - ls
+      - cd /infra
+      - ls
       - echo Entered the build phase...
       - echo Build and package cloudformation template
-      - aws cloudformation package --template-file WebSocket/infra/autorizer-infra-main.yml --s3-bucket $BUILD_OUTPUT_BUCKET --output-template-file packaged-template.yml
+      - aws cloudformation package --template-file autorizer-infra-main.yml --s3-bucket $BUILD_OUTPUT_BUCKET --output-template-file packaged-template.yml
+      - ls
       - cat ./packaged-template.yml
     finally:
       - echo Build code and package
