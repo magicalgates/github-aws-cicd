@@ -6,8 +6,12 @@ phases:
       python: 3.x
       nodejs: 16.x
     commands:
-      - pip install --upgrade pip
-      - ls -l && python --version
+      - node -v
+      - npm -v
+      - pwd
+      - cd WebSocket/Code/
+      - aws s3 cp s3://${S3_REQUIREMENTS_FILE_PATH} package.json
+      - npm install
       - pip install cfn-lint
     finally:
       - echo Installation phase has been completed.s
