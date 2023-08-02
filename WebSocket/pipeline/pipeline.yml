@@ -287,6 +287,9 @@ Resources:
           -
             Name: S3_CONFIGURATION_FILE_PATH
             Value: !Ref S3ConfigurationPath
+          -
+            Name: S3_REQUIREMENTS_FILE_PATH
+            Value: !Ref S3RequirementsPath
       Cache:
         Type: S3
         Location: !Sub ${BuildArtifactsBucket}/codebuild-cache
