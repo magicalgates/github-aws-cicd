@@ -12,19 +12,19 @@ phases:
       - pip install cfn-lint
     finally:
       - echo Installation phase has been completed.s
-  pre_build:
-    commands:
-      - echo Entered the pre_build phase...
-      - echo Downloading the serverless template
-      - cd WebSocket/infra/
-    finally:
-      - echo Template and Configuration download
+  # pre_build:
+  #   commands:
+  #     - echo Entered the pre_build phase...
+  #     - echo Downloading the serverless template
+  #     # - cd WebSocket/infra/
+  #   finally:
+  #     - echo Template and Configuration download
   build:
     commands:
       - ls -l
       - echo Entered the build phase...
       - echo Build and package cloudformation template
-      - aws cloudformation package --template-file autorizer-infra-main.yml --s3-bucket $BUILD_OUTPUT_BUCKET --output-template-file packaged-template.yml
+      - aws cloudformation package --template-file WebSocket/infra/autorizer-infra-main.yml --s3-bucket $BUILD_OUTPUT_BUCKET --output-template-file packaged-template.yml
       - cat ./packaged-template.yml
     finally:
       - echo Build code and package
@@ -32,15 +32,17 @@ phases:
     commands:
       - echo Build completed on `date`
       - echo Downloading the cloudformation configuration file
-      - cd ../../
-      - ls
-      - cd WebSocket/pipeline/
       - ls -l
+      - cp WebSocket/pipeline/configuration.json .
+      # - cd ../../
+      # - ls
+      # - cd WebSocket/pipeline/
+      # - ls -l
       # - aws s3 cp s3://${S3_CONFIGURATION_FILE_PATH} ./configuration.json
     finally:
       - echo Template and Configuration download
 
 artifacts:
   files:
-    - ./WebSocket/infra/packaged-template.yml
-    - ./WebSocket/pipeline/configuration.json
+    - ./packaged-template.yml
+    - ./configuration.json
