@@ -29,7 +29,7 @@ phases:
       - ls -l
       - echo Entered the build phase...
       - echo Build and package cloudformation template
-      - aws cloudformation package --template-file WebSocket/infra/ --s3-bucket $BUILD_OUTPUT_BUCKET --output-template-file packaged-template.yml
+      - aws cloudformation package --template-file ${S3_TEMPLATE_FILE_PATH} --s3-bucket $BUILD_OUTPUT_BUCKET --output-template-file packaged-template.yml
       - cat ./packaged-template.yml
     finally:
       - echo Build code and package
