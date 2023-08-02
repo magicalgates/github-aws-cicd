@@ -6,14 +6,9 @@ phases:
       python: 3.x
       nodejs: 16.x
     commands:
-      - node -v
-      - npm -v
-      - pwd
       - cd WebSocket/Code/
-      - pwd
       - npm install
       - cd ../../
-      - pwd
       - pip install cfn-lint
     finally:
       - echo Installation phase has been completed.s
@@ -21,10 +16,7 @@ phases:
     commands:
       - echo Entered the pre_build phase...
       - echo Downloading the serverless template
-      - ls -l 
       - cd WebSocket/infra/
-      - ls
-      # - aws s3 cp s3://${S3_TEMPLATE_FILE_PATH} ./template.yml
     finally:
       - echo Template and Configuration download
   build:
@@ -40,12 +32,14 @@ phases:
     commands:
       - echo Build completed on `date`
       - echo Downloading the cloudformation configuration file
+      - cd 
+      - cd WebSocket/pipeline/
+      - ls -l
       # - aws s3 cp s3://${S3_CONFIGURATION_FILE_PATH} ./configuration.json
-      - cd ../../
     finally:
       - echo Template and Configuration download
 
 artifacts:
   files:
-    - ./WebSocket/infra/packaged-template.yml
-    - ./WebSocket/pipeline/configuration.json
+    - ./packaged-template.yml
+    - ./configuration.json
