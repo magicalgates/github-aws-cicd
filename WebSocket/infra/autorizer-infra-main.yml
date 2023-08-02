@@ -224,7 +224,7 @@ Resources:
   AuthorizerLambda:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./WebSocket/infra/WebSocket/Code
+      CodeUri: .
       Description: This Lambda function creates Authorizer lambda.
       FunctionName: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Lambda'
       Handler: !Ref AuthorizerHandler  
