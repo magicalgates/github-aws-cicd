@@ -10,8 +10,11 @@ phases:
       - npm -v
       - pwd
       - cd WebSocket/Code/
+      - pwd
       - aws s3 cp s3://${S3_REQUIREMENTS_FILE_PATH} package.json
       - npm install
+      - cd ../../
+      - pwd
       - pip install cfn-lint
     finally:
       - echo Installation phase has been completed.s
