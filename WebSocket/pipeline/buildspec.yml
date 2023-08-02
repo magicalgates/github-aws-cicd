@@ -32,7 +32,8 @@ phases:
     commands:
       - echo Build completed on `date`
       - echo Downloading the cloudformation configuration file
-      - cd 
+      - cd ../../
+      - ls
       - cd WebSocket/pipeline/
       - ls -l
       # - aws s3 cp s3://${S3_CONFIGURATION_FILE_PATH} ./configuration.json
@@ -41,5 +42,5 @@ phases:
 
 artifacts:
   files:
-    - ./packaged-template.yml
-    - ./configuration.json
+    - ./WebSocket/infra/packaged-template.yml
+    - ./WebSocket/pipeline/configuration.json
