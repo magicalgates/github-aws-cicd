@@ -27,9 +27,9 @@ phases:
   build:
     commands:
       - ls -l
-      - cd /WebSocket
+      - cd WebSocket
       - ls
-      - cd /infra
+      - cd infra
       - ls
       - echo Entered the build phase...
       - echo Build and package cloudformation template
