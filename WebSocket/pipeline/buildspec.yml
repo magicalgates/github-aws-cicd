@@ -14,32 +14,24 @@ phases:
       - echo Installation phase has been completed.s
   pre_build:
     commands:
-      - echo Entered the pre_build phase...
-      - echo Downloading the serverless template
-      - cp WebSocket/infra/autorizer-infra-main.yml .
-      - ls
+      - echo "Entered the pre_build phase..."
+      - echo "Downloading the serverless template"
+      - aws s3 cp s3://${S3_TEMPLATE_FILE_PATH} ./template.yml
     finally:
       - echo Template and Configuration download
   build:
     commands:
-      - ls -l
       - echo Entered the build phase...
       - echo Build and package cloudformation template
-      - aws cloudformation package --template-file autorizer-infra-main.yml --s3-bucket $BUILD_OUTPUT_BUCKET --output-template-file packaged-template.yml
+      - aws cloudformation package --template-file template.yml --s3-bucket $BUILD_OUTPUT_BUCKET --output-template-file packaged-template.yml
       - cat ./packaged-template.yml
     finally:
       - echo Build code and package
   post_build:
     commands:
-      - echo Build completed on `date`
-      - echo Downloading the cloudformation configuration file
-      - ls -l
-      - cp WebSocket/pipeline/configuration.json .
-      # - cd ../../
-      # - ls
-      # - cd WebSocket/pipeline/
-      # - ls -l
-      # - aws s3 cp s3://${S3_CONFIGURATION_FILE_PATH} ./configuration.json
+      - echo "Build completed on $(date)"
+      - echo "Downloading the cloudformation configuration file"
+      - aws s3 cp s3://${S3_CONFIGURATION_FILE_PATH} ./configuration.json
     finally:
       - echo Template and Configuration download
 
