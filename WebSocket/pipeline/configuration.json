@@ -1,9 +1,9 @@
 {
     "Parameters": {
-        "Timeout": "120",
+        "Timeout": "300",
         "AuthorizerUrl": "https://staging.cyncsoftware.com/",
         "ResourceNamePrefix": "NDS-CYNC",
-        "EnvironmentName": "POC",
+        "EnvironmentName": "STAGING",
         "Runtime": "nodejs16.x",
         "LambdaMemory": "128",
         "AuthorizerHandler": "index.handler",
@@ -12,17 +12,17 @@
         "Owner": "NDS",
         "InfoClassification": "Internal",
         "ServiceName": "WEBSOCKET",
-        "SecurityGroupId": "sg-0ac912c312e2a477a",
+        "CommonSGExportName": "NDS-CYNC-DEV-WEBSOCKET-SecurityGroup",
         "Compliance": "SOC2"
     },
     "Tags": {
-        "Name": "NDS-CYNC-Staging-Websocket-Authorizer-Lambda-Stk",
+        "Name": "NDS-CYNC-STAGING-WebSocket-Authorizer-Lambda-Stk",
         "Owner": "NDS",
-        "Environment": "POC",
+        "Environment": "STAGING",
         "Project": "NDS-CYNC",
         "InfoClassification": "Internal",
         "ApplicationID": "WEBSOCKET-Authorizer",
-        "ApplicationRole": "Authorizer-CFN",
+        "ApplicationRole": "WEBSOCKET-Authorizer-CFN",
         "Automation": "TRUE"
     }
 }
