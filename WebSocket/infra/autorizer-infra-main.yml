@@ -1,5 +1,5 @@
 Transform: AWS::Serverless-2016-10-31
-Description: This Template Creates WebSocket API and Lambda functions.
+Description: This Template Creates WebSocket Authorizer Lambda functions.
 Parameters: 
   ResourceNamePrefix:
     Type: String
@@ -11,9 +11,8 @@ Parameters:
     Default: NDS-CYNC
   EnvironmentName:
     Type: String
-    Default: POC
+    Default: STAGING
     AllowedValues:
-      - POC
       - DEV
       - DEV2
       - STAGING
@@ -96,18 +95,13 @@ Parameters:
       - python3.6
       - nodejs16.x
       - java11
-  SecurityGroupId:
+  CommonSGExportName:
     Type: String
     Description: Specify the Common Security group ID
-    Default: SeuritygroupID
+    Default: NDS-CYNC-STAGING-COMMON-LAMBDA-SG
 
 Mappings:
   Environments:
-    POC:
-      RetentionInDays: 7
-      Subnets:
-        - subnet-00578498d20bcfd71
-        - subnet-0517c1dbe19aaa70e
     DEV:
       RetentionInDays: 7
       Subnets: 
@@ -159,6 +153,9 @@ Resources:
                 - lambda.amazonaws.com
             Action:
               - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
       Path: /
       Policies:
         - PolicyDocument:
@@ -173,7 +170,6 @@ Resources:
                   - 'ec2:DescribeSecurityGroups'
                   - 'ec2:DescribeSubnets'
                   - 'ec2:DescribeVpcs'
-                  - 's3:HeadBucket'
                 Resource: '*'
               - Action:
                   - 'ec2:CreateNetworkInterface'
@@ -190,18 +186,6 @@ Resources:
                   - !Sub >-
                     arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:network-interface/*
                 Effect: Allow
-              - Sid: Logstreaming
-                Effect: Allow
-                Action:
-                  - 'logs:CreateLogGroup'
-                  - 'logs:CreateLogStream'
-                  - 'logs:TagLogGroup'
-                  - 'logs:PutLogEvents'
-                Resource:
-                  - !Sub >-
-                    arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Lambda
-                  - !Sub >-
-                    arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Lambda:*
           PolicyName: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Policy'
       Tags:
         - Key: Name
@@ -237,7 +221,8 @@ Resources:
           authUrl: !Ref AuthorizerUrl   
       VpcConfig:
         SecurityGroupIds:
-          - !Ref SecurityGroupId        
+          - Fn::ImportValue:
+              !Ref CommonSGExportName      
         SubnetIds: !FindInMap [Environments, !Ref EnvironmentName, Subnets]
       Tags:
         Name: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Lambda'
@@ -248,5 +233,3 @@ Resources:
         Owner: !Ref Owner
         InfoClassification: !Ref InfoClassification
         Compliance: !Ref Compliance
-
-
