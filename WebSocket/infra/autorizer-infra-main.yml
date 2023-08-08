@@ -13,6 +13,7 @@ Parameters:
     Type: String
     Default: STAGING
     AllowedValues:
+      - POC
       - DEV
       - DEV2
       - STAGING
@@ -102,6 +103,11 @@ Parameters:
 
 Mappings:
   Environments:
+    POC:
+      RetentionInDays: 7
+      Subnets:
+      - subnet-0517c1dbe19aaa70e
+      - subnet-00578498d20bcfd71
     DEV:
       RetentionInDays: 7
       Subnets: 
