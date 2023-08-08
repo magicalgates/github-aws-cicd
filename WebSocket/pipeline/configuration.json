@@ -12,7 +12,7 @@
         "Owner": "NDS",
         "InfoClassification": "Internal",
         "ServiceName": "WEBSOCKET",
-        "CommonSGExportName": "NDS-CYNC-DEV-WEBSOCKET-SecurityGroup",
+        "CommonSGExportName": "NDS-CYNC-TEST-COMMON-SG",
         "Compliance": "SOC2"
     },
     "Tags": {
