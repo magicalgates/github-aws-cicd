@@ -3,7 +3,7 @@
         "Timeout": "300",
         "AuthorizerUrl": "https://staging.cyncsoftware.com/",
         "ResourceNamePrefix": "NDS-CYNC",
-        "EnvironmentName": "STAGING",
+        "EnvironmentName": "POC",
         "Runtime": "nodejs16.x",
         "LambdaMemory": "128",
         "AuthorizerHandler": "index.handler",
