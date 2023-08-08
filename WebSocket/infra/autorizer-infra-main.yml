@@ -181,7 +181,7 @@ Resources:
                   - 'ec2:CreateNetworkInterface'
                 Resource:
                   - !Sub >-
-                    arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:security-group/${SecurityGroupId}
+                    arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:security-group/${CommonSGExportName}
                   - !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:subnet/*'
                   - !Sub >-
                     arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:network-interface/*
