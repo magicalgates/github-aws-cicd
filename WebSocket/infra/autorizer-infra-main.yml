@@ -97,8 +97,8 @@ Parameters:
       - java11
   CommonSGExportName:
     Type: String
-    Description: Specify the Common Security group ID
-    Default: NDS-CYNC-DEV-WEBSOCKET-SecurityGroup
+    Description: Specify the Common Security group
+    Default: NDS-CYNC-TEST-COMMON-SG
 
 Mappings:
   Environments:
@@ -222,7 +222,7 @@ Resources:
       VpcConfig:
         SecurityGroupIds:
           - Fn::ImportValue:
-              !Ref CommonSGExportName      
+                !Ref CommonSGExportName      
         SubnetIds: !FindInMap [Environments, !Ref EnvironmentName, Subnets]
       Tags:
         Name: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Lambda'
