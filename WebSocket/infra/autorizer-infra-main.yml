@@ -13,7 +13,6 @@ Parameters:
     Type: String
     Default: STAGING
     AllowedValues:
-      - POC
       - DEV
       - DEV2
       - STAGING
@@ -99,15 +98,10 @@ Parameters:
   CommonSGExportName:
     Type: String
     Description: Specify the Common Security group
-    Default: NDS-CYNC-TEST-COMMON-SG
+    Default: NDS-CYNC-STAGING-COMMON-LAMBDA-SG
 
 Mappings:
   Environments:
-    POC:
-      RetentionInDays: 7
-      Subnets:
-      - subnet-00578498d20bcfd71
-      - subnet-0517c1dbe19aaa70e
     DEV:
       RetentionInDays: 7
       Subnets: 
@@ -163,36 +157,6 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
       Path: /
-      Policies:
-        - PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Sid: ec2permission
-                Effect: Allow
-                Action:
-                  - 'ec2:DescribeDhcpOptions'
-                  - 'ec2:DescribeNetworkInterfaces'
-                  - 'ec2:DeleteNetworkInterface'
-                  - 'ec2:DescribeSecurityGroups'
-                  - 'ec2:DescribeSubnets'
-                  - 'ec2:DescribeVpcs'
-                Resource: '*'
-              - Action:
-                  - 'ec2:CreateNetworkInterface'
-                Resource:
-                  - !Sub >-
-                    arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:security-group/${CommonSGExportName}
-                  - !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:subnet/*'
-                  - !Sub >-
-                    arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:network-interface/*
-                Effect: Allow
-              - Action:
-                  - 'ec2:CreateNetworkInterfacePermission'
-                Resource:
-                  - !Sub >-
-                    arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:network-interface/*
-                Effect: Allow
-          PolicyName: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Policy'
       Tags:
         - Key: Name
           Value: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Policy'
@@ -228,7 +192,7 @@ Resources:
       VpcConfig:
         SecurityGroupIds:
           - Fn::ImportValue:
-                !Ref CommonSGExportName      
+              !Ref CommonSGExportName      
         SubnetIds: !FindInMap [Environments, !Ref EnvironmentName, Subnets]
       Tags:
         Name: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Lambda'
@@ -239,3 +203,4 @@ Resources:
         Owner: !Ref Owner
         InfoClassification: !Ref InfoClassification
         Compliance: !Ref Compliance
+
