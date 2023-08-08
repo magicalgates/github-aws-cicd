@@ -98,7 +98,7 @@ Parameters:
   CommonSGExportName:
     Type: String
     Description: Specify the Common Security group ID
-    Default: NDS-CYNC-STAGING-COMMON-LAMBDA-SG
+    Default: NDS-CYNC-DEV-WEBSOCKET-SecurityGroup
 
 Mappings:
   Environments:
