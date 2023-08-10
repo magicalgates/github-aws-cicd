@@ -32,7 +32,7 @@ email_attachment_path = 'NDS_Systems_Generic_LenderWiseCost_Report.xlsx'    # Sp
 #s3_import.py paramater details
 #Input values
 # Year = 2023
-Month = 'June'
+Month = 'July'
 s3_folder_prefix='Bills'
 
 generic_bucket_name = 'yashdemobucket007'
