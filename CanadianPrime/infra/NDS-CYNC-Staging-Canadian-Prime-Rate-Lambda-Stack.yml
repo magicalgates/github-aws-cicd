@@ -13,6 +13,7 @@ Parameters:
     Type: String
     Default: STAGING
     AllowedValues:
+      - POC
       - DEV
       - DEV2
       - STAGING
@@ -121,6 +122,11 @@ Parameters:
 
 Mappings:
   Environments:
+    POC:
+      RetentionInDays: 7
+      Subnets:
+      - subnet-0517c1dbe19aaa70e
+      - subnet-00578498d20bcfd71
     DEV2:
       Subnets:
       - subnet-5d910c71
@@ -163,6 +169,7 @@ Mappings:
       - subnet-11ff891e
       VpcId: vpc-b53bfadf
       RetentionInDays: 731
+      
 Resources:
   LambdaRole:
     Type: AWS::IAM::Role
