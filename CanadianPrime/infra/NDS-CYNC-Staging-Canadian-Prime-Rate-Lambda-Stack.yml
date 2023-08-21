@@ -238,7 +238,7 @@ Resources:
         Ref: Handler
       MemorySize:
         Ref: LambdaMemory
-      CodeUri: .
+      CodeUri: ./CanadianPrime/Code
       Role:
         Fn::GetAtt:
         - LambdaRole
