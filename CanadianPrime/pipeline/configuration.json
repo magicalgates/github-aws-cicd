@@ -2,7 +2,7 @@
     "Parameters": {
         "Timeout": "300",
         "ResourceNamePrefix": "NDS-CYNC",
-        "EnvironmentName": "STAGING",
+        "EnvironmentName": "POC",
         "Runtime": "ruby2.7",
         "ScheduleExpression": "cron(15 13 ? * MON-FRI *)",
         "LambdaMemory": "128",
@@ -12,7 +12,7 @@
         "Owner": "NDS",
         "InfoClassification": "Internal",
         "ServiceName": "Canadian-Prime-Rate",
-        "CommonSGExportName": "NDS-CYNC-STAGING-COMMON-LAMBDA-SG",
+        "CommonSGExportName": "NDS-CYNC-TEST-COMMON-SG",
         "Compliance": "SOC2",
         "AwsSecretName": "NDS-CYNC-STAGING-Audit-DBConfiguration-E31Q5o",
         "AwsRegionName": "us-east-1",
@@ -22,7 +22,7 @@
     "Tags": {
         "Name": "NDS-CYNC-STAGING-Candian-Prime-Rate-Lambda-Stack",
         "Owner": "NDS",
-        "Environment": "STAGING",
+        "Environment": "POC",
         "Project": "NDS-CYNC",
         "InfoClassification": "Internal",
         "ApplicationID": "CANADIAN-PRIME",
