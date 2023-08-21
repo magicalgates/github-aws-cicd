@@ -1,11 +1,11 @@
 {
     "Parameters": {
-        "Timeout": "300",
+        "Timeout": "600",
         "ResourceNamePrefix": "NDS-CYNC",
         "Environment": "POC",
         "Runtime": "ruby2.7",
         "ScheduleExpression": "cron(15 13 ? * MON-FRI *)",
-        "LambdaMemory": "128",
+        "LambdaMemory": "512",
         "Handler": "handler.main",
         "ApplicationID": "CANADIAN-PRIME",
         "Project": "NDS-CYNC",
