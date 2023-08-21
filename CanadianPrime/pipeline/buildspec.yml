@@ -3,6 +3,8 @@ version: 0.2
 phases:
   install:
     commands:
+      - pwd
+      - ls -l
       - pip install cfn-lint
     finally:
       - echo Installation phase has been completed.
