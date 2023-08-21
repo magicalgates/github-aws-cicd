@@ -2,8 +2,6 @@ version: 0.2
 
 phases:
   install:
-    runtime-versions:
-      ruby: 2.x
     commands:
       - pip install cfn-lint
     finally:
