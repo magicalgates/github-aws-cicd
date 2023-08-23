@@ -217,7 +217,7 @@ Resources:
               Properties:
                 Name:
                   Fn::Sub: ${Project}-${Environment}-${ServiceName}-Lambda-Schedule-Event
-                Schedule:
+                Schedule: !Ref
                   Fn::Sub: ${ScheduleExpression}
                 State:
                   Ref: State
