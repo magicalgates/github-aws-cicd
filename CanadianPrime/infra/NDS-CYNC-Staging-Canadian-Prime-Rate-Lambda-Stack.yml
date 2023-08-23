@@ -174,7 +174,7 @@ Mappings:
 Resources:
   'Fn::ForEach::Lambda':
     - Schedule
-    - [cron(15 13 ? * MON-FRI *), cron(30 19 ? * MON-FRI *)]
+    - ['cron(15 13 ? * MON-FRI *)', 'cron(30 19 ? * MON-FRI *)']
     - Lambda:
         Type: AWS::Serverless::Function
         Properties:
