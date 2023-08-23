@@ -174,7 +174,7 @@ Mappings:
 Resources:
   'Fn::ForEach::Lambda':
     - Schedule
-    - ['cron(15 13 ? * MON-FRI *)', 'cron(30 19 ? * MON-FRI *)']
+    - !GetAtt ['cron(15 13 ? * MON-FRI *)', 'cron(30 19 ? * MON-FRI *)']
     - Lambda:
         Type: AWS::Serverless::Function
         Properties:
@@ -217,7 +217,7 @@ Resources:
               Properties:
                 Name:
                   Fn::Sub: ${Project}-${Environment}-${ServiceName}-Lambda-Schedule-Event
-                Schedule: !GetAtt
+                Schedule: !Ref
                   Fn::Sub: ${Schedule}
                 State:
                   Ref: State
