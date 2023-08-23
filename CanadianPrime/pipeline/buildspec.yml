@@ -14,6 +14,7 @@ phases:
       - echo "Downloading the serverless template"
       - aws s3 cp s3://${S3_TEMPLATE_FILE_PATH} ./template.yml
       - ls -l
+      - cat ./template.yml
     finally:
       - echo Template and Configuration download
   build:
