@@ -13,6 +13,7 @@ phases:
       - echo "Entered the pre_build phase..."
       - echo "Downloading the serverless template"
       - aws s3 cp s3://${S3_TEMPLATE_FILE_PATH} ./template.yml
+      - ls -l
     finally:
       - echo Template and Configuration download
   build:
