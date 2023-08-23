@@ -85,7 +85,6 @@ Parameters:
   ScheduleExpression:
     Type: CommaDelimitedList
     Description: "Cron Expression based triggering lambda funtion. For Example: '''cron(30 15 ? * MON-FRI *)'''"
-    Default: cron(15 13 ? * MON-FRI *), cron(30 19 ? * MON-FRI *)
   Runtime:
     Type: String
     Description: Lambda Runtime version.
