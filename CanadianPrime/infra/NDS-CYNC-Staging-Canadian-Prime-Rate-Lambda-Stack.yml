@@ -173,7 +173,7 @@ Mappings:
       
 Resources:
   'Fn::ForEach::Lambda':
-    - ScheduleExpression
+    - Schedule
     - !Ref ScheduleExpression
     - Lambda:
         Type: AWS::Serverless::Function
@@ -218,7 +218,7 @@ Resources:
                 Name:
                   Fn::Sub: ${Project}-${Environment}-${ServiceName}-Lambda-Schedule-Event
                 Schedule: !Ref
-                  Fn::Sub: ${ScheduleExpression}
+                  Fn::Sub: ${Schedule}
                 State:
                   Ref: State
           Tags:
