@@ -13,7 +13,7 @@
         "ServiceName": "AUTO-LOAN-FILE-MISSING",
         "CommonSGExportName": "NDS-CYNC-TEST-COMMON-SG",
         "Compliance": "SOC2",
-        "AwsSecretName": "NDS-CYNC-STAGING-Audit-DBConfiguration-E31Q5o",
+        "AwsSecretName": "NDS-CYNC-STAGING-Audit-DBConfiguration",
         "AwsRegionName": "us-east-1",
         "RailsEnv": "staging",
         "State": "ENABLED",
