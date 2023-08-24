@@ -1,6 +1,4 @@
-Transform: 
-  - 'AWS::LanguageExtensions'
-  - 'AWS::Serverless-2016-10-31'
+Transform: AWS::Serverless-2016-10-31
 Description: This template Creates Lambda function and Cloudwatchrule.
 Parameters:
   ResourceNamePrefix:
@@ -26,7 +24,7 @@ Parameters:
     Description: Choose the environment where the service is being deployed.
   ServiceName:
     Type: String
-    Default: Canadian-Prime-Rate
+    Default: AUTO-LOAN-FILE-MISSING
     Description: Enter the service name of the current stack.
   Owner:
     Type: String
@@ -34,7 +32,7 @@ Parameters:
     Description: Enter a value for tag Owner
   ApplicationID:
     Type: String
-    Default: CANADIAN-PRIME
+    Default: AUTO-LOAN-MISSING
     Description: Enter a value for tag ApplicationID
   InfoClassification:
     Type: String
@@ -47,7 +45,7 @@ Parameters:
   LambdaMemory:
     Type: String
     Description: Specify the Memory size required for lambda function to run.
-    Default: '512'
+    Default: '256'
     AllowedValues:
       - '128'
       - '192'
@@ -75,16 +73,29 @@ Parameters:
       - '2000'
   AwsSecretName:
     Type: String
-    Default: NDS-CYNC-STAGING-Audit-DBConfiguration-E31Q5o
+    Default: NDS-CYNC-STAGING-Audit-DBConfiguration
     Description: Specify Secretid from SecretsManagerARN to fetch the required values.
   Timeout:
     Type: String
     Description: Enter the lambda function timeout in seconds.
     Default: '600'
     AllowedPattern: '^[0-9]{1,3}'
-  # ScheduleExpression:
-  #   Type: CommaDelimitedList
-  #   Description: "Cron Expression based triggering lambda funtion. For Example: '''cron(30 15 ? * MON-FRI *)'''"
+  ScheduleExpressionPacificTime:
+    Type: String
+    Description: "Cron Expression based triggering lambda funtion. For Example: '''cron(30 15 ? * MON-FRI *)'''"
+    Default: cron(30 22 ? * MON-FRI *)
+  ScheduleExpressionEasternTime:
+    Type: String
+    Description: "Cron Expression based triggering lambda funtion. For Example: '''cron(30 15 ? * MON-FRI *)'''"
+    Default: cron(30 19 ? * MON-FRI *)
+  ScheduleExpressionMountainTime:
+    Type: String
+    Description: "Cron Expression based triggering lambda funtion. For Example: '''cron(30 15 ? * MON-FRI *)'''"
+    Default: cron(30 21 ? * MON-FRI *)
+  ScheduleExpressionCentralTime:
+    Type: String
+    Description: "Cron Expression based triggering lambda funtion. For Example: '''cron(30 15 ? * MON-FRI *)'''"
+    Default: cron(30 20 ? * MON-FRI *)
   Runtime:
     Type: String
     Description: Lambda Runtime version.
@@ -170,75 +181,7 @@ Mappings:
       - subnet-11ff891e
       VpcId: vpc-b53bfadf
       RetentionInDays: 731
-      
 Resources:
-  'Fn::ForEach::Lambda':
-    - Schedule
-    - !GetAtt ['cron(15 13 ? * MON-FRI *)', 'cron(30 19 ? * MON-FRI *)']
-    - Lambda:
-        Type: AWS::Serverless::Function
-        Properties:
-          FunctionName:
-            Fn::Sub: ${Project}-${Environment}-${ServiceName}-Lambda
-          Description: Lambda function to run the Canadian prime Rate lambda functionality.
-          Handler:
-            Ref: Handler
-          MemorySize:
-            Ref: LambdaMemory
-          CodeUri: ./CanadianPrime/Code
-          Role:
-            Fn::GetAtt:
-            - LambdaRole
-            - Arn
-          Runtime:
-            Ref: Runtime
-          Timeout:
-            Ref: Timeout
-          VpcConfig:
-            SecurityGroupIds:
-            - Fn::ImportValue:
-                Ref: CommonSGExportName
-            SubnetIds:
-              Fn::FindInMap:
-              - Environments
-              - Ref: Environment
-              - Subnets
-          Environment:
-            Variables:
-              AWS_REGION_NAME:
-                Ref: AwsRegionName
-              AWS_SECRET_NAME:
-                Ref: AwsSecretName
-              RAILS_ENV:
-                Ref: RailsEnv
-          Events:
-            ScheduleEvent:
-              Type: Schedule
-              Properties:
-                Name:
-                  Fn::Sub: ${Project}-${Environment}-${ServiceName}-Lambda-Schedule-Event
-                Schedule: !Ref
-                  Fn::Sub: ${Schedule}
-                State:
-                  Ref: State
-          Tags:
-            Name:
-              Fn::Sub: ${Project}-${Environment}-${ServiceName}-Lambda
-            ApplicationRole:
-              Fn::Sub: ${ApplicationID}-FUNC
-            Environment:
-              Ref: Environment
-            ApplicationID:
-              Ref: ApplicationID
-            Project:
-              Ref: Project
-            Owner:
-              Ref: Owner
-            InfoClassification:
-              Ref: InfoClassification
-            Compliance:
-              Ref: Compliance
-          
   LambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -266,10 +209,7 @@ Resources:
           - Effect: Allow
             Action: secretsmanager:GetSecretValue
             Resource:
-              Fn::Sub: arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${AwsSecretName}
-          - Effect: Allow
-            Action: secretsmanager:ListSecrets
-            Resource: '*'
+              Fn::Sub: arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${AwsSecretName}-*
       Tags:
       - Key: Name
         Value:
@@ -295,6 +235,98 @@ Resources:
       - Key: Compliance
         Value:
           Ref: Compliance
+
+  Lambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: ${Project}-${Environment}-${ServiceName}-Lambda
+      Description: Lambda function to run the Auto Loan file missing lambda functionality.
+      Handler:
+        Ref: Handler
+      MemorySize:
+        Ref: LambdaMemory
+      CodeUri: .
+      Role:
+        Fn::GetAtt:
+        - LambdaRole
+        - Arn
+      Runtime:
+        Ref: Runtime
+      Timeout:
+        Ref: Timeout
+      VpcConfig:
+        SecurityGroupIds:
+        - Fn::ImportValue:
+            Ref: CommonSGExportName
+        SubnetIds:
+          Fn::FindInMap:
+          - Environments
+          - Ref: Environment
+          - Subnets
+      Environment:
+        Variables:
+          AWS_REGION_NAME:
+            Ref: AwsRegionName
+          AWS_SECRET_NAME:
+            Ref: AwsSecretName
+          RAILS_ENV:
+            Ref: RailsEnv
+      Events:
+        ScheduleEventPT:
+          Type: Schedule
+          Properties:
+            Name:
+              Fn::Sub: ${Project}-${Environment}-${ServiceName}-Lambda-Schedule-PT
+            Schedule:
+              Ref: ScheduleExpressionPacificTime
+            State:
+              Ref: State
+        ScheduleEventEST:
+          Type: Schedule
+          Properties:
+            Name:
+              Fn::Sub: ${Project}-${Environment}-${ServiceName}-Lambda-Schedule-EST
+            Schedule:
+              Ref: ScheduleExpressionEasternTime
+            State:
+              Ref: State
+        ScheduleEventMT:
+          Type: Schedule
+          Properties:
+            Name:
+              Fn::Sub: ${Project}-${Environment}-${ServiceName}-Lambda-Schedule-MT
+            Schedule:
+              Ref: ScheduleExpressionMountainTime
+            State:
+              Ref: State
+        ScheduleEventCT:
+          Type: Schedule
+          Properties:
+            Name:
+              Fn::Sub: ${Project}-${Environment}-${ServiceName}-Lambda-Schedule-CT
+            Schedule:
+              Ref: ScheduleExpressionCentralTime
+            State:
+              Ref: State    
+      Tags:
+        Name:
+          Fn::Sub: ${Project}-${Environment}-${ServiceName}-Lambda
+        ApplicationRole:
+          Fn::Sub: ${ApplicationID}-FUNC
+        Environment:
+          Ref: Environment
+        ApplicationID:
+          Ref: ApplicationID
+        Project:
+          Ref: Project
+        Owner:
+          Ref: Owner
+        InfoClassification:
+          Ref: InfoClassification
+        Compliance:
+          Ref: Compliance
+
 Outputs:
   Lambda:
     Value: !Ref Lambda
