@@ -1,0 +1,254 @@
+Transform: AWS::Serverless-2016-10-31
+Description: This Template Creates instance utilization lambda function.
+Parameters: 
+  ResourceNamePrefix:
+    Type: String
+    Default: NDS-CYNC
+    Description: Prefix for the name of the resource
+  Project:
+    Type: String
+    Description: Enter a value for tag Project
+    Default: NDS-CYNC
+  EnvironmentName:
+    Type: String
+    Default: STAGING
+    AllowedValues:
+      - POC
+      - DEV
+      - DEV2
+      - STAGING
+      - PRESTAGING
+      - PRODSUPPORT
+      - UAT
+      - PROD
+    Description: Choose the environment where the service is being deployed.
+  ServiceName:
+    Type: String
+    Default: INSTANCE-UTILIZATION
+    Description: Enter the service name of the current stack.
+  Owner:
+    Type: String
+    Default: NDS
+    Description: Enter a value for tag Owner
+  ApplicationID:
+    Type: String
+    Default: INSTANCE-UTILIZATION
+    Description: Enter a value for tag ApplicationID
+  InfoClassification:
+    Type: String
+    Description: Enter a value for tag InfoClassification
+    Default: Internal
+  Compliance:
+    Type: String
+    Description: Enter a value for tag Compliance
+    Default: SOC2
+  LambdaHandler:
+    Type: String
+    Description: Specify Handler for the Authorizer lambda function
+    Default: index.handler
+  LambdaMemory:
+    Type: String
+    Description: Specify the Memory size required for lambda function to run.
+    Default: '128'
+    AllowedValues:
+      - '128'
+      - '192'
+      - '256'
+      - '320'
+      - '384'
+      - '448'
+      - '512'
+      - '576'
+      - '640'
+      - '704'
+      - '768'
+      - '832'
+      - '896'
+      - '960'
+      - '1024'
+      - '1088'
+      - '1152'
+      - '1216'
+      - '1280'
+      - '1344'
+      - '1408'
+      - '1472'
+      - '1536'
+      - '2000'
+  Timeout:
+    Type: String
+    Description: Enter the lambda function timeout in seconds.
+    Default: '300'
+    AllowedPattern: '^[0-9]{1,3}'
+  Runtime:
+    Type: String
+    Description: Lambda Runtime version.
+    Default: python3.9
+    AllowedValues:
+      - ruby2.7
+      - python3.8
+      - python3.9
+      - java8
+      - python3.6
+      - nodejs16.x
+      - java11
+  CommonSGExportName:
+    Type: String
+    Description: Specify the Common Security group
+    Default: NDS-CYNC-STAGING-COMMON-LAMBDA-SG
+
+Mappings:
+  Environments:
+    POC:
+      Subnets:
+      - subnet-0517c1dbe19aaa70e
+      - subnet-00578498d20bcfd71
+    DEV:
+      Subnets: 
+        - subnet-5d910c71
+        - subnet-4265a87d
+        - subnet-5f085905
+    DEV2:
+      Subnets: 
+        - subnet-5d910c71
+        - subnet-4265a87d
+        - subnet-5f085905
+    STAGING:
+      Subnets:
+        - subnet-b7bf529b
+        - subnet-cd72ae85
+        - subnet-c4bb6f99
+    PRESTAGING:
+      Subnets:
+        - subnet-b7bf529b
+        - subnet-cd72ae85
+        - subnet-c4bb6f99
+    UAT:
+      Subnets:
+        - subnet-0f2d3cb9a4a7d1d44
+        - subnet-00a46aaef3ee378fa
+        - subnet-09d856d1ef81ed834
+    PROD:
+      Subnets:
+        - subnet-15515b4f
+        - subnet-61b51b5c
+        - subnet-a2d424d4  
+  
+Resources:
+  LambdaRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Lambda-Role'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      Path: /
+      Tags:
+        - Key: Name
+          Value: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Policy'
+        - Key: Environment
+          Value: !Ref EnvironmentName
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Project
+          Value: !Ref ResourceNamePrefix
+        - Key: ApplicationID
+          Value: !Ref ApplicationID
+        - Key: ApplicationRole
+          Value: !Sub '${ApplicationID}-ROLE'
+        - Key: Compliance
+          Value: !Ref Compliance
+        - Key: InfoClassification
+          Value: !Ref InfoClassification
+
+  LambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Description: This Lambda function creates server utilization lambda.
+      FunctionName: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Lambda'
+      Handler: !Ref LambdaHandler  
+      MemorySize: !Ref LambdaMemory    
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: !Ref Runtime
+      Timeout: !Ref Timeout
+      VpcConfig:
+        SecurityGroupIds:
+          - Fn::ImportValue:
+              !Ref CommonSGExportName      
+        SubnetIds: !FindInMap [Environments, !Ref EnvironmentName, Subnets]
+      Tags:
+        Name: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Lambda'
+        ApplicationRole: !Sub '${ApplicationID}-FUNC'
+        Environment: !Ref EnvironmentName
+        ApplicationID: !Ref ApplicationID
+        Project: !Ref Project
+        Owner: !Ref Owner
+        InfoClassification: !Ref InfoClassification
+        Compliance: !Ref Compliance
+
+  # Document: 
+  #   Type: AWS::SSM::Document
+  #   Properties:
+  #     Tags: 
+  #          - Key: Name
+  #            Value: !Sub ${ResourceNamePrefix}-${EnvironmentType}-${ApplicationID}-Document
+  #          - Key: ApplicationRole
+  #            Value: !Sub '${ApplicationID}-SSM'
+  #          - Key: InfoClassification
+  #            Value: !Ref InfoClassification
+  #          - Key: Environment
+  #            Value: !Ref EnvironmentType
+  #          - Key: ApplicationID
+  #            Value: !Ref ApplicationID
+  #          - Key: Project
+  #            Value: !Ref ResourceNamePrefix
+  #          - Key: Owner
+  #            Value: !Ref Owner
+  #          - Key: Compliance
+  #            Value: !Ref Compliance
+  #     Content:
+  #       description: Systems Manager Automation Demo - To invoke a lambda function
+  #       schemaVersion: '0.3'
+  #       assumeRole: '{{ AutomationAssumeRole }}'
+  #       parameters:
+  #         AutomationAssumeRole:
+  #           type: String
+  #           description: !Sub ${ResourceNamePrefix}-${EnvironmentType}-${ApplicationID}-Role.'(Required) The ARN of the role that allows Automation to perform the actions on your behalf. If no role is specified, Systems Manager Automation uses your IAM permissions to execute this document.'
+  #           default: ''
+  #         NewUserName:
+  #           type: String
+  #           description: (Required) Enter the Name of New Lender
+  #         AlarmsSnsTopicARN:
+  #           type: String
+  #           description: Specify SNS TOPIC_ARN that sends notification.
+  #           default: ''
+  #         LambdaFunctionName:
+  #           type: String
+  #           description: (Required) Enter the Lambda Function name
+  #           default: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Lambda'
+  #       mainSteps:
+  #         - name: InvokeLambdaFuction
+  #           action: 'aws:invokeLambdaFunction'
+  #           maxAttempts: 3
+  #           timeoutSeconds: 1200
+  #           onFailure: Abort
+  #           inputs:
+  #             FunctionName: '{{ LambdaFunctionName }}'
+  #             InputPayload:
+  #               NewUserName: '{{ NewUserName }}'
+  #               EnvironmentName: '{{ EnvironmentName }}'
+  #               AlarmsSnsTopicARN: '{{ AlarmsSnsTopicARN }}'
+  #     DocumentFormat: YAML
+  #     DocumentType: Automation
+  #     UpdateMethod: NewVersion
+  #     Name: !Sub ${ResourceNamePrefix}-${EnvironmentType}-${ApplicationID}-Document
