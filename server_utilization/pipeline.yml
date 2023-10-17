@@ -1,0 +1,686 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >
+  This template generates a generic CI/CD Pipeline for Serverless Apps that use SAM (Serverless Application Model).
+  Charges may apply for AWS Services utilized - Below are a summary for your convenience:
+    GitHub: Manages and Stores your service source code (Git repository)
+    Amazon S3: Manages CodeBuild Artifacts as well as Cache for subsequent runs when defined in the build spec
+    AWS CodeBuild: Manages and Runs builds specified under buildspec.yaml
+    AWS CodePipeline: Manages and Runs the Continuous Integration and Continuous Deployment pipeline
+    AWS CloudFormation: Manages SAM templates and creates the Infrastructure necessary for each environment
+    AWS IAM: Manages Identity and Access across Services outlined above
+Parameters:
+  ResourceNamePrefix:
+    Description: Enter the value to be prefixed with the resources created.
+    Type: String
+    Default: Nds-Cync
+    AllowedValues:
+      - Nds-Cync
+
+  GithubRepoName:
+    Description: Enter the GitHub branch name to be configured in Codepipeline source stage.
+    Type: String
+    Default: aws-cync-infra-automation
+
+  GithubSecretsName:
+    Description: Enter the Secrets Manager name where the GitHub credentials are stored.
+    Type: String
+    Default: Nds-Cync-Staging-Github-Secret
+  
+  GithubLosPkgTokenSecretName:
+    Type: String
+    Description: Enter the secret name,where the GIthub token to read the Los git packages are stored.
+    Default: NDS-CYNC-STAGING-Los-Pkg-Read-GithubToken
+  
+  GithubSecretsTokenKey:
+    Description: Enter the GitHub key name stored in Secrets Manager for codepipeline authentication.
+    Type: String
+    Default: GitHubToken
+    NoEcho: true
+
+  GithubBranch:
+    Description: Enter the GitHub branch to be configured in Codepipeline source stage.
+    Type: String
+    Default: staging-release
+
+  GithubUser:
+    Description: Enter the GitHub user to be configured in Codepipeline source stage.
+    Type: String
+    Default: idexcel-technologies-pvt-ltd
+    AllowedValues:
+      - idexcel-technologies-pvt-ltd
+
+  ArtifactsBucketName:
+    Description: |
+      Enter a valid S3 bucket name to save the codepipeline artifact files.
+      If you have selected true for parameter CreateArtifactsBucket, enter a new bucket name.
+      If you have selected false for parameter CreateArtifactsBucket, enter an existing bucket name.
+    Type: String
+
+  Environment:
+    Description: Name your Environment according to your need.
+    Type: String
+    Default: Staging
+    AllowedValues:
+      - DEV
+      - DEV2
+      - PROD
+      - STAGING
+      - Staging
+      - PRESTAGING
+      - UAT
+
+  ServiceName:
+    Type: String
+    Description: Enter the name of the application/service.
+
+  ApplicationId:
+    Type: String
+    Description: Enter the value for tag ApplicationID.
+
+  
+  AutoDeployment:
+    Type: String
+    AllowedValues:
+      - true
+      - false
+
+  CreateArtifactsBucket:
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+
+  TemplateConfigurationFileS3ObjectKey:
+    Type: String
+    Description: Enter the full S3 key of the cloudformation configuration file. Refer the default value.
+    Default: foldername/Configuration.json
+
+  InfraTemplateS3ObjectKey:
+    Type: String
+    Description: Enter the S3 object key of the serverless infra template.
+    Default: foldername/NDS-CYNC-Cync-Search-Template.yml
+
+  BuildSpecS3ObjectKey:
+    Type: String
+    Description: Enter the S3 object key of the buildspec file.
+    Default: foldername/buildspec.yml
+
+  CodeBuildImage:
+    Type: String
+    Description: Select the codebuild image used for the codebuild project.
+    Default: aws/codebuild/amazonlinux2-x86_64-standard:4.0
+    AllowedValues:
+      - aws/codebuild/amazonlinux2-x86_64-standard:2.0
+      - aws/codebuild/amazonlinux2-x86_64-standard:3.0
+      - aws/codebuild/amazonlinux2-x86_64-standard:4.0
+      - aws/codebuild/amazonlinux2-x86_64-standard:5.0
+      - aws/codebuild/amazonlinux2-x86_64-standard:6.0
+
+  TemplateBucketName:
+    Type: String
+    Description: Enter the S3 bucket name where the cloudformation template are stored.
+    Default: nds-cync-staging-github-cloudformation-bucket-582080386172
+
+  LambdaDeployStageRequired:
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  
+  EnvironmentVariableRequired:
+    Type: String
+    AllowedValues:
+      - true
+      - false
+    Default: 'false'
+    Description: Enter the value true to create GITHUBLOSPKGTOKENSECRETNAME EnvironmentVariable.
+  
+  MigratorLambdaName:
+    Type: String
+    Default: false
+    Description: Enter the migrator lambda function name if you are creating lambda deploy stage.
+
+  MigratorBuildSpecS3ObjectKey:
+    Type: String
+    Description: Enter the S3 object key of the migrator lambda buildspec file.
+    Default: foldername/buildspec.yml
+
+  LogsStatus:
+    Type: String
+    AllowedValues:
+      - ENABLED
+      - DISABLED
+    Default: ENABLED
+    Description: Select ENABLED to enable CloudWatch logs for codebuild project.
+
+
+  S3ObjectRetentionDays:
+    Type: String
+    Description: Enter the S3 artifacts bucket object retention period in days. Enter a value if you have are creating a new artifacts bucket.
+    Default: '30'
+
+  RetentionLog:
+    Type: String
+    Description: Enter the value for loggroup retention days.
+    Default: '30'
+      
+Conditions:
+  ShouldCreateWebhook: !Equals [true, !Ref AutoDeployment]
+  CreateBucket: !Equals [true, !Ref CreateArtifactsBucket]
+  LambdaStage: !Equals [true, !Ref LambdaDeployStageRequired]
+  IsEnvironmentVariableRequired: !Equals [true, !Ref EnvironmentVariableRequired]
+
+
+
+Metadata:
+  'AWS::CloudFormation::Interface':
+    ParameterLabels: 
+      CreateArtifactsBucket: 
+        default: "Do you want to create a new S3 artifacts bucket for the Codepipeline?"
+      AutoDeployment: 
+        default: "Do you want to enable Codepipeline autodeployment?"
+      LambdaDeployStageRequired:
+        default: "Do you want to create a Migrator Lambda deployment stage for the Codepieline?"
+    ParameterGroups:
+      - Label:
+          default: GitHub Codepipeline Details
+        Parameters:
+          - GithubRepoName
+          - GithubBranch
+          - GithubUser
+          - GithubSecretsName
+          - GithubSecretsTokenKey
+      - Label:
+          default: Codepipeline Build Stage Details
+        Parameters:
+          - CodeBuildImage
+          - LogsStatus
+      - Label:
+          default: Artifacts Bucket Details
+        Parameters:
+          - CreateArtifactsBucket
+          - ArtifactsBucketName
+      - Label:
+          default: Templates and Configuration Files S3 Details
+        Parameters:
+          - TemplateConfigurationFileS3ObjectKey
+          - InfraTemplateS3ObjectKey
+          - BuildSpecS3ObjectKey
+          - TemplateBucketName
+      - Label:
+          default: Common Parameters
+        Parameters:
+          - ResourceNamePrefix
+          - ServiceName
+          - AutoDeployment
+          - S3ObjectRetentionDays
+      - Label:
+          default: Resource Tag Details
+        Parameters:
+          - Environment
+          - Owner
+          - InfoClassification
+          - Project
+          - ApplicationId
+      - Label:
+          default: Migrator Lambda Deploy Stage Details
+        Parameters:
+          - LambdaDeployStageRequired
+          - MigratorLambdaName
+          - MigratorBuildSpecS3ObjectKey
+
+Resources:
+  WebhookService:
+    Type: AWS::CodePipeline::Webhook
+    Condition: ShouldCreateWebhook
+    Properties:
+      Name: !Sub '${ResourceNamePrefix}-${Environment}-${ServiceName}-Webhook'
+      AuthenticationConfiguration:
+        SecretToken: !Sub '{{resolve:secretsmanager:${GithubSecretsName}:SecretString:${GithubSecretsTokenKey}}}'
+      Filters:
+      - JsonPath: "$.ref"   
+        MatchEquals: refs/heads/{Branch}
+      Authentication: GITHUB_HMAC
+      TargetPipeline:
+        Ref: Pipeline
+      TargetAction: Source
+      TargetPipelineVersion:
+        Fn::GetAtt:
+          - Pipeline
+          - Version
+      RegisterWithThirdParty: 'true'
+
+  ArtifactsBucket:
+    Type: AWS::S3::Bucket
+    Condition: CreateBucket
+    Properties:
+      BucketName: !Ref ArtifactsBucketName
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - ExpirationInDays: !Ref S3ObjectRetentionDays
+            NoncurrentVersionExpirationInDays: !Ref S3ObjectRetentionDays
+            Status: Enabled
+            Id: !Sub ${ResourceNamePrefix}-${Environment}-Delete-S3Object-Lifecycle-Rule
+      Tags:
+        - Key: Name
+          Value: !Sub '${ResourceNamePrefix}-${Environment}-${ServiceName}-Artifacts-Bucket'
+        - Key: ApplicationRole
+          Value: !Sub '${ApplicationId}-Bkt'
+          
+  BucketPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Condition: CreateBucket
+    DependsOn:
+      - ArtifactsBucket
+    Properties:
+      Bucket: !Ref ArtifactsBucketName
+      PolicyDocument:
+        Statement:
+          - Sid: AllowSSLRequestsOnly
+            Effect: Deny
+            Principal:
+              Service: 'codepipeline.amazonaws.com'
+            Action:
+              - 's3:*'
+            Resource:
+              - !Sub 'arn:aws:s3:::${ArtifactsBucketName}/*'
+              - !Sub 'arn:aws:s3:::${ArtifactsBucketName}'
+            Condition:
+              Bool:
+                'aws:SecureTransport': false
+
+  ########  ##     ## #### ##       ########
+  ##     ## ##     ##  ##  ##       ##     ##
+  ##     ## ##     ##  ##  ##       ##     ##
+  ########  ##     ##  ##  ##       ##     ##
+  ##     ## ##     ##  ##  ##       ##     ##
+  ##     ## ##     ##  ##  ##       ##     ##
+  ########   #######  #### ######## ########
+
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub '${ResourceNamePrefix}-${Environment}-${ServiceName}-CodeBuild'
+        - Key: ApplicationRole
+          Value: !Sub '${ApplicationId}-Cbld'
+      Name: !Sub '${ResourceNamePrefix}-${Environment}-${ServiceName}-CodeBuild'
+      Description: Build project for authentication and authorization of 3rd party API calls
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: !Ref CodeBuildImage # More info on Images: https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-available.html
+        EnvironmentVariables:
+          -
+            Name: BUILD_OUTPUT_BUCKET
+            Value: !Ref ArtifactsBucketName
+          -
+            Name: S3_TEMPLATE_FILE_PATH
+            Value: !Sub ${TemplateBucketName}/${InfraTemplateS3ObjectKey}
+          -
+            Name: S3_CONFIGURATION_FILE_PATH
+            Value: !Sub ${TemplateBucketName}/${TemplateConfigurationFileS3ObjectKey}
+          - !If
+            - IsEnvironmentVariableRequired
+            -
+              Name: GITHUBLOSPKGTOKENSECRETNAME
+              Value: !Ref GithubLosPkgTokenSecretName
+            - !Ref "AWS::NoValue"
+      Cache:
+        Type: S3
+        Location: !Sub ${ArtifactsBucketName}/codebuild-cache
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: !Sub 'arn:aws:s3:::${TemplateBucketName}/${BuildSpecS3ObjectKey}'
+      LogsConfig:
+        CloudWatchLogs: 
+          GroupName: !Ref CWLogGroup
+          Status: !Ref LogsStatus
+  
+  LambdaDeployProject:
+    Type: AWS::CodeBuild::Project
+    Condition: LambdaStage
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub '${ResourceNamePrefix}-${Environment}-${ServiceName}-LambdaInvoke-CodeBuild'
+        - Key: ApplicationRole
+          Value: !Sub '${ApplicationId}-Cbld'
+      Name: !Sub '${ResourceNamePrefix}-${Environment}-${ServiceName}-LambdaInvoke-CodeBuild'
+      Description: Build project for authentication and authorization of 3rd party API calls
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: !Ref CodeBuildImage # More info on Images: https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-available.html
+        EnvironmentVariables:
+          -
+            Name: LAMBDA_FUNCTION_NAME
+            Value: !Ref MigratorLambdaName
+      Cache:
+        Type: S3
+        Location: !Sub ${ArtifactsBucketName}/codebuild-cache
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: !Sub 'arn:aws:s3:::${TemplateBucketName}/${MigratorBuildSpecS3ObjectKey}'
+      LogsConfig:
+        CloudWatchLogs: 
+          GroupName: !Ref CWLogGroup
+          Status: !Ref LogsStatus
+
+  ########  #### ########  ######## ##       #### ##    ## ########
+  ##     ##  ##  ##     ## ##       ##        ##  ###   ## ##
+  ##     ##  ##  ##     ## ##       ##        ##  ####  ## ##
+  ########   ##  ########  ######   ##        ##  ## ## ## ######
+  ##         ##  ##        ##       ##        ##  ##  #### ##
+  ##         ##  ##        ##       ##        ##  ##   ### ##
+  ##        #### ##        ######## ######## #### ##    ## ########
+
+  Pipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub '${ResourceNamePrefix}-${Environment}-${ServiceName}-CodePipeline'
+        - Key: ApplicationRole
+          Value: !Sub '${ApplicationId}-Pipeline'
+      ArtifactStore:
+        Location: !Ref ArtifactsBucketName
+        Type: S3
+      Name: !Sub '${ResourceNamePrefix}-${Environment}-${ServiceName}-CodePipeline'
+      RoleArn: !GetAtt CodePipelineExecutionRole.Arn
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: Source
+              ActionTypeId:
+                # More info on Possible Values: https://docs.aws.amazon.com/codepipeline/latest/userguide/reference-pipeline-structure.html#action-requirements
+                Category: Source
+                Owner: ThirdParty
+                Provider: GitHub
+                Version: "1"
+              Configuration:
+                Owner: !Ref GithubUser
+                Repo: !Ref GithubRepoName
+                Branch: !Ref GithubBranch
+                OAuthToken: !Sub '{{resolve:secretsmanager:${GithubSecretsName}:SecretString:${GithubSecretsTokenKey}}}'
+                PollForSourceChanges: 'false'
+              OutputArtifacts:
+                - Name: SourceCodeAsZip
+              RunOrder: 1
+        - Name: Build
+          Actions:
+            - Name: CodeBuild
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: "1"
+              Configuration:
+                ProjectName: !Ref CodeBuildProject
+              InputArtifacts:
+                - Name: SourceCodeAsZip
+              OutputArtifacts:
+                - Name: BuildArtifactAsZip
+        - Name: CloudFormationDeploy
+          Actions:
+            - Name: CreateChangeSet
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: "1"
+              Configuration:
+                # More info on Possible Values for Cloudformation: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/continuous-delivery-codepipeline-action-reference.html#w2ab2c13c13b9
+                ActionMode: CHANGE_SET_REPLACE
+                RoleArn: 
+                   Fn::ImportValue:
+                      !Sub '${ResourceNamePrefix}-${Environment}-Common-Codepipeline-Cfn-Role'
+                StackName: !Sub '${ResourceNamePrefix}-${Environment}-${ServiceName}-Infra-Stack'
+                ChangeSetName: !Sub '${ResourceNamePrefix}-${Environment}-${ServiceName}-ChangeSet'
+                TemplatePath: BuildArtifactAsZip::packaged-template.yml
+                TemplateConfiguration: BuildArtifactAsZip::configuration.json
+                Capabilities: CAPABILITY_NAMED_IAM
+              InputArtifacts:
+                - Name: BuildArtifactAsZip
+              RunOrder: 1
+            - Name: ExecuteChangeSet
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: "1"
+              Configuration:
+                ActionMode: CHANGE_SET_EXECUTE
+                RoleArn: 
+                   Fn::ImportValue:
+                      !Sub '${ResourceNamePrefix}-${Environment}-Common-Codepipeline-Cfn-Role'
+                StackName: !Sub '${ResourceNamePrefix}-${Environment}-${ServiceName}-Infra-Stack'
+                ChangeSetName: !Sub '${ResourceNamePrefix}-${Environment}-${ServiceName}-ChangeSet'
+              OutputArtifacts:
+                - Name: !Sub '${ResourceNamePrefix}-${Environment}-${ServiceName}-ChangeSet'
+              RunOrder: 2
+        - !If 
+          - LambdaStage
+          - Name: LambdaMigratorDeploy
+            Actions:
+            - Name: LambdaDeploy
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: "1"
+              Configuration:
+                ProjectName: !Ref LambdaDeployProject
+              InputArtifacts:
+                - Name: BuildArtifactAsZip
+          - !Ref "AWS::NoValue"
+
+  ####    ###    ##     ##
+   ##    ## ##   ###   ###
+   ##   ##   ##  #### ####
+   ##  ##     ## ## ### ##
+   ##  ######### ##     ##
+   ##  ##     ## ##     ##
+  #### ##     ## ##     ##
+
+  CodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ResourceNamePrefix}-${Environment}-${ServiceName}-CodeBuild-Role'
+      Tags:
+        - Key: Name
+          Value: !Sub '${ResourceNamePrefix}-${Environment}-${ServiceName}-CodeBuild-Role'
+        - Key: ApplicationRole
+          Value: !Sub '${ApplicationId}-CodeBuild-Role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action:
+              - 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+      Path: /
+      Policies:
+        - PolicyName: CodeBuildLogs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource:
+                  - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${ResourceNamePrefix}-${Environment}-${ServiceName}-*'
+                  - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${ResourceNamePrefix}-${Environment}-${ServiceName}-*:*'
+        - PolicyName: CodeBuildArtifactsBucket
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:GetObjectVersion'
+                Resource:
+                  - !Sub 'arn:aws:s3:::${ArtifactsBucketName}/*'
+                  - !Sub 'arn:aws:s3:::${TemplateBucketName}/*'
+              - Effect: Allow
+                Action:
+                  - 's3:PutObject'
+                Resource:
+                  - !Sub 'arn:aws:s3:::${ArtifactsBucketName}/*'
+        - !If 
+          - LambdaStage
+          - PolicyName: LamdaInvokeAccess
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                      - 'lambda:InvokeFunction'
+                  Resource: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${MigratorLambdaName}'
+          - !Ref "AWS::NoValue"
+        - !If
+          - IsEnvironmentVariableRequired
+          - PolicyName: ReadingSecretValue
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                      - secretsmanager:GetSecretValue
+                  Resource: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${GithubLosPkgTokenSecretName}-*'
+          - !Ref "AWS::NoValue"
+                      
+  CodePipelineExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ResourceNamePrefix}-${Environment}-${ServiceName}-CodePipeline-Role'
+      Tags:
+        - Key: Name
+          Value: !Sub '${ResourceNamePrefix}-${Environment}-${ServiceName}-CodePipeline-Role'
+        - Key: ApplicationRole
+          Value: !Sub '${ApplicationId}-CodePipeline-Role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action:
+              - 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service:
+                - codepipeline.amazonaws.com
+      Path: /
+      Policies:
+        - PolicyName: CodePipelineAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                    - 'iam:PassRole'
+                Resource: '*'
+        - PolicyName: CodePipelineCodeAndArtifactsS3Bucket
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:GetObjectVersion'
+                  - 's3:PutObject'
+                Resource: 
+                  - !Sub 'arn:aws:s3:::${ArtifactsBucketName}/*'
+                  - !Sub 'arn:aws:s3:::${TemplateBucketName}/*'
+        - PolicyName: CodePipelineCodeBuildAndCloudformationAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'codebuild:StartBuild'
+                  - 'codebuild:BatchGetBuilds'
+                Resource:
+                  - !Sub 'arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${CodeBuildProject}'
+                  - !If
+                    - LambdaStage
+                    - !Sub 'arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${LambdaDeployProject}'
+                    - !Ref "AWS::NoValue"
+              - Effect: Allow
+                Action:
+                  - 'cloudformation:CreateStack'
+                  - 'cloudformation:DescribeStacks'
+                  - 'cloudformation:DeleteStack'
+                  - 'cloudformation:UpdateStack'
+                  - 'cloudformation:CreateChangeSet'
+                  - 'cloudformation:ExecuteChangeSet'
+                  - 'cloudformation:DeleteChangeSet'
+                  - 'cloudformation:DescribeChangeSet'
+                  - 'cloudformation:SetStackPolicy'
+                  - 'cloudformation:ValidateTemplate'
+                Resource:
+                  - !Sub 'arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ResourceNamePrefix}-${Environment}*/*'
+                  - !Sub 'arn:aws:cloudformation:${AWS::Region}:aws:transform/Serverless-2016-10-31'
+
+  CWLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties: 
+      LogGroupName: !Sub '${ResourceNamePrefix}-${Environment}-${ServiceName}-CodeBuild-Logs'
+      RetentionInDays: !Ref RetentionLog
+      Tags:
+        - Key: Name
+          Value: !Sub '${ResourceNamePrefix}-${Environment}-${ServiceName}-CodeBuild-Logs'
+        - Key: ApplicationRole
+          Value: !Sub ${ApplicationId}-CodeBuild-Lg
+  
+
+
+Outputs:
+  GitHubRepositoryHttpUrl:
+    Description: GitHub Git repository
+    Value: !Sub https://github.com/${GithubUser}/${GithubRepoName}.git
+
+  GitHubRepositorySshUrl:
+    Description: GitHub Git repository
+    Value: !Sub git@github.com:${GithubUser}/${GithubRepoName}.git
+
+  BuildArtifactS3Bucket:
+    Description: Amazon S3 Bucket for Pipeline and Build artifacts
+    Value: !Ref ArtifactsBucketName
+
+  CodeBuildProject:
+    Description: CodeBuild Project name
+    Value: !Ref CodeBuildProject
+
+  CodePipeline:
+    Description: AWS CodePipeline pipeline name
+    Value: !Ref Pipeline
+
+  CodeBuildIAMRole:
+    Description: CodeBuild IAM Role
+    Value: !GetAtt CodeBuildServiceRole.Arn
+
+  CodePipelineIAMRole:
+    Description: CodePipeline IAM Role
+    Value: !GetAtt CodePipelineExecutionRole.Arn
