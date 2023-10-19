@@ -146,7 +146,7 @@ def daily():
 
     # Create a Pandas DataFrame from the daily data
     df = pd.DataFrame(daily_data)
-    # print(df)
+    print(df)
 
     # Create an in-memory buffer for the Excel file
     excel_buffer = io.BytesIO()
@@ -247,7 +247,7 @@ def montly():
 
     # Create a Pandas DataFrame from the monthly data
     df = pd.DataFrame(monthly_data)
-    print(df)
+    # print(df)
 
     # Create an in-memory buffer for the Excel file
     excel_buffer = io.BytesIO()
