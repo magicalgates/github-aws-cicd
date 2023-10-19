@@ -173,7 +173,7 @@ Resources:
   LambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: .
+      CodeUri: ./server_utilization/code
       Description: This Lambda function creates server utilization lambda.
       FunctionName: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Lambda'
       Handler: !Ref LambdaHandler  
