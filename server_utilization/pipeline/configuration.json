@@ -5,7 +5,7 @@
         "EnvironmentName": "POC",
         "Runtime": "python3.9",
         "LambdaMemory": "128",
-        "LambdaHandler": "index.handler",
+        "LambdaHandler": "daily.lambda_handler",
         "ApplicationID": "INSTANCE-UTILIZATION",
         "Project": "NDS-CYNC",
         "Owner": "NDS",
