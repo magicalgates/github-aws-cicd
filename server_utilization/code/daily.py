@@ -265,7 +265,7 @@ def montly():
     # print(f"{metric_name}_{autoscaling_group_name}_{start_date}_{end_date}.xlsx")
 
 
-def main():
+def lambda_handler(event, context):
     if flag == "Daily":
         print("Initializing the execution for daily basis")
         daily()
@@ -274,9 +274,6 @@ def main():
         print("Initializing the execution for montly basis")
         montly()
         print("Completed Execution")
-
-def lambda_handler(event, context):
-    main()
     return {
     'statusCode': 200,
     'body': json.dumps('Execution is completed from Lambda')
