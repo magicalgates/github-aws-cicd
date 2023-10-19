@@ -274,5 +274,9 @@ def main():
         montly()
         print("Completed Execution")
 
-if __name__ == "__main__":
+def lambda_handler(event, context):
     main()
+    return {
+    'statusCode': 200,
+    'body': json.dumps('Execution is completed from Lambda')
+    }
