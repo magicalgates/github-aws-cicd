@@ -13,7 +13,7 @@ s3 = boto3.client('s3')
 cloudwatch = boto3.client('cloudwatch')
 
 # Specify the Flag i.e,. "Daily" or "Montly"
-flag = "Montly"
+flag = "Daily"
 
 # Specify the Report name
 report_name = "Spot_CPU_Montly_utilization"
