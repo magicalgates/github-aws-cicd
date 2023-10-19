@@ -5,6 +5,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 import pytz  
 import io
+import json
 
 # Initialize an S3 client
 s3 = boto3.client('s3')
