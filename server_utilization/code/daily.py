@@ -33,7 +33,7 @@ name_space = 'AWS/EC2'
 
 # Specify the start and end date
 start_date = '2023-09-29'  
-end_date = '2023-09-12'   
+end_date = '2023-10-12'   
 
 # Specify the IST time zone
 ist_timezone = 'Asia/Kolkata'
@@ -146,7 +146,7 @@ def daily():
 
     # Create a Pandas DataFrame from the daily data
     df = pd.DataFrame(daily_data)
-    print(df)
+    # print(df)
 
     # Create an in-memory buffer for the Excel file
     excel_buffer = io.BytesIO()
