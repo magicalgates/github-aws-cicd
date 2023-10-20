@@ -169,7 +169,7 @@ Resources:
                   - 's3:GetBucketAcl'
                   - 's3:PutObjectAcl'
                   - 's3:GetObjectVersion'
-                Resource: *
+                Resource: '*'
       Path: /
       Tags:
         - Key: Name
