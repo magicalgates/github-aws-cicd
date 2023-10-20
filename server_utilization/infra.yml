@@ -154,7 +154,7 @@ Resources:
       Path: /
       Tags:
         - Key: Name
-          Value: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Authorizer-Policy'
+          Value: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Policy'
         - Key: Environment
           Value: !Ref EnvironmentName
         - Key: Owner
@@ -198,6 +198,13 @@ Resources:
 
 #################### SSM DOCUMENT CREATION ################################################
 
+  InstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: /
+      Roles:
+        - Ref: AutomationServiceRole
+
   IAMPolicy:
     Type: 'AWS::IAM::Policy'
     Properties:
@@ -233,10 +240,10 @@ Resources:
               ArnLike:
                 aws:SourceArn: !Sub arn:aws:ssm:*:${AWS::AccountId}:automation-execution/*
       Path: /
-      RoleName: !Sub ${ResourceNamePrefix}-${EnvironmentName}-${ApplicationID}-Role
+      RoleName: !Sub ${ResourceNamePrefix}-${EnvironmentName}-${ApplicationID}-SSM-Role
       Tags: 
         - Key: Name
-          Value: !Sub ${ResourceNamePrefix}-${EnvironmentName}-${ApplicationID}-Role
+          Value: !Sub ${ResourceNamePrefix}-${EnvironmentName}-${ApplicationID}-SSM-Role
         - Key: ApplicationRole
           Value: !Sub '${ApplicationID}-SSM'
         - Key: InfoClassification
