@@ -198,29 +198,6 @@ Resources:
 
 #################### SSM DOCUMENT CREATION ################################################
 
-  InstanceProfile:
-    Type: 'AWS::IAM::InstanceProfile'
-    Properties:
-      Path: /
-      Roles:
-        - Ref: AutomationServiceRole
-
-  IAMPolicy:
-    Type: 'AWS::IAM::Policy'
-    Properties:
-      PolicyName: !Sub ${ResourceNamePrefix}-${EnvironmentName}-${ApplicationID}-IAM-Policy
-      PolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Sid: VisualEditor0
-            Effect: Allow
-            Action:
-              - 'lambda:InvokeFunctionUrl'
-              - 'lambda:InvokeFunction'
-            Resource: '*'
-      Roles: 
-        - Ref: AutomationServiceRole
-
   AutomationServiceRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -259,6 +236,29 @@ Resources:
           Value: !Ref Owner
         - Key: Compliance
           Value: !Ref Compliance
+          
+  InstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: /
+      Roles:
+        - Ref: AutomationServiceRole
+
+  IAMPolicy:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyName: !Sub ${ResourceNamePrefix}-${EnvironmentName}-${ApplicationID}-IAM-Policy
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: VisualEditor0
+            Effect: Allow
+            Action:
+              - 'lambda:InvokeFunctionUrl'
+              - 'lambda:InvokeFunction'
+            Resource: '*'
+      Roles: 
+        - Ref: AutomationServiceRole
 
   Document: 
     Type: AWS::SSM::Document
