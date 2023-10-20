@@ -218,7 +218,8 @@ Resources:
               - 'lambda:InvokeFunctionUrl'
               - 'lambda:InvokeFunction'
             Resource: '*'
-      Roles: !Ref AutomationServiceRole
+      Roles: 
+        - Ref: AutomationServiceRole
 
   AutomationServiceRole:
     Type: 'AWS::IAM::Role'
