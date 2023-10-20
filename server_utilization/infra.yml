@@ -295,10 +295,6 @@ Resources:
             allowedValues:
               - 'Daily'
               - 'Montly'
-          ReportName:
-            type: String
-            description: Specify SNS TOPIC_ARN that sends notification.
-            default: ''
           LambdaFunctionName:
             type: String
             description: (Required) Enter the Lambda Function name
@@ -315,7 +311,7 @@ Resources:
           NameSpace:
             type: String
             description: (Required) Specify name space
-            AllowedValues:
+            allowedValues:
               - 'AWS/EC2'
               - 'CWAgent'
           StartDate:
