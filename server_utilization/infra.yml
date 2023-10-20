@@ -151,6 +151,25 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      Policies:
+        - PolicyName: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Lambda-Policy'
+          PolicyDocument: 
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'cloudwatch:GetMetricStatistics'
+                  - 's3:PutObject'
+                  - 's3:GetObjectAcl'
+                  - 's3:GetObject'
+                  - 's3:PutObjectVersionAcl'
+                  - 's3:GetObjectVersionAcl'
+                  - 's3:ListBucket'
+                  - 's3:GetBucketVersioning'
+                  - 's3:GetBucketAcl'
+                  - 's3:PutObjectAcl'
+                  - 's3:GetObjectVersion'
+                Resource: *
       Path: /
       Tags:
         - Key: Name
