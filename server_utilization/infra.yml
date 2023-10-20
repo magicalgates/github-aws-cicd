@@ -151,7 +151,6 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
-        - arn:aws:iam::aws:policy/AmazonS3FullAccess
       Path: /
       Tags:
         - Key: Name
@@ -174,7 +173,7 @@ Resources:
   LambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./server_utilization/code
+      CodeUri: .
       Description: This Lambda function creates server utilization lambda.
       FunctionName: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Lambda'
       Handler: !Ref LambdaHandler  
@@ -197,59 +196,156 @@ Resources:
         InfoClassification: !Ref InfoClassification
         Compliance: !Ref Compliance
 
-  # Document: 
-  #   Type: AWS::SSM::Document
-  #   Properties:
-  #     Tags: 
-  #          - Key: Name
-  #            Value: !Sub ${ResourceNamePrefix}-${EnvironmentType}-${ApplicationID}-Document
-  #          - Key: ApplicationRole
-  #            Value: !Sub '${ApplicationID}-SSM'
-  #          - Key: InfoClassification
-  #            Value: !Ref InfoClassification
-  #          - Key: Environment
-  #            Value: !Ref EnvironmentType
-  #          - Key: ApplicationID
-  #            Value: !Ref ApplicationID
-  #          - Key: Project
-  #            Value: !Ref ResourceNamePrefix
-  #          - Key: Owner
-  #            Value: !Ref Owner
-  #          - Key: Compliance
-  #            Value: !Ref Compliance
-  #     Content:
-  #       description: Systems Manager Automation Demo - To invoke a lambda function
-  #       schemaVersion: '0.3'
-  #       assumeRole: '{{ AutomationAssumeRole }}'
-  #       parameters:
-  #         AutomationAssumeRole:
-  #           type: String
-  #           description: !Sub ${ResourceNamePrefix}-${EnvironmentType}-${ApplicationID}-Role.'(Required) The ARN of the role that allows Automation to perform the actions on your behalf. If no role is specified, Systems Manager Automation uses your IAM permissions to execute this document.'
-  #           default: ''
-  #         NewUserName:
-  #           type: String
-  #           description: (Required) Enter the Name of New Lender
-  #         AlarmsSnsTopicARN:
-  #           type: String
-  #           description: Specify SNS TOPIC_ARN that sends notification.
-  #           default: ''
-  #         LambdaFunctionName:
-  #           type: String
-  #           description: (Required) Enter the Lambda Function name
-  #           default: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Lambda'
-  #       mainSteps:
-  #         - name: InvokeLambdaFuction
-  #           action: 'aws:invokeLambdaFunction'
-  #           maxAttempts: 3
-  #           timeoutSeconds: 1200
-  #           onFailure: Abort
-  #           inputs:
-  #             FunctionName: '{{ LambdaFunctionName }}'
-  #             InputPayload:
-  #               NewUserName: '{{ NewUserName }}'
-  #               EnvironmentName: '{{ EnvironmentName }}'
-  #               AlarmsSnsTopicARN: '{{ AlarmsSnsTopicARN }}'
-  #     DocumentFormat: YAML
-  #     DocumentType: Automation
-  #     UpdateMethod: NewVersion
-  #     Name: !Sub ${ResourceNamePrefix}-${EnvironmentType}-${ApplicationID}-Document
+#################### SSM DOCUMENT CREATION ################################################
+
+  IAMPolicy:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyName: !Sub ${ResourceNamePrefix}-${EnvironmentName}-${ApplicationID}-IAM-Policy
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: VisualEditor0
+            Effect: Allow
+            Action:
+              - 'lambda:InvokeFunctionUrl'
+              - 'lambda:InvokeFunction'
+            Resource: '*'
+      Roles: !Ref AutomationServiceRole
+
+  AutomationServiceRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+                - ssm.amazonaws.com
+                - iam.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Sub ${AWS::AccountId}
+              ArnLike:
+                aws:SourceArn: !Sub arn:aws:ssm:*:${AWS::AccountId}:automation-execution/*
+      Path: /
+      RoleName: !Sub ${ResourceNamePrefix}-${EnvironmentName}-${ApplicationID}-Role
+      Tags: 
+        - Key: Name
+          Value: !Sub ${ResourceNamePrefix}-${EnvironmentName}-${ApplicationID}-Role
+        - Key: ApplicationRole
+          Value: !Sub '${ApplicationID}-SSM'
+        - Key: InfoClassification
+          Value: !Ref InfoClassification
+        - Key: Environment
+          Value: !Ref EnvironmentName
+        - Key: ApplicationID
+          Value: !Ref ApplicationID
+        - Key: Project
+          Value: !Ref ResourceNamePrefix
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Compliance
+          Value: !Ref Compliance
+
+  Document: 
+    Type: AWS::SSM::Document
+    Properties:
+      Tags: 
+           - Key: Name
+             Value: !Sub ${ResourceNamePrefix}-${EnvironmentName}-${ApplicationID}-Document
+           - Key: ApplicationRole
+             Value: !Sub '${ApplicationID}-SSM'
+           - Key: InfoClassification
+             Value: !Ref InfoClassification
+           - Key: Environment
+             Value: !Ref EnvironmentName
+           - Key: ApplicationID
+             Value: !Ref ApplicationID
+           - Key: Project
+             Value: !Ref ResourceNamePrefix
+           - Key: Owner
+             Value: !Ref Owner
+           - Key: Compliance
+             Value: !Ref Compliance
+      Content:
+        description: Systems Manager Automation Demo - To invoke a lambda function
+        schemaVersion: '0.3'
+        assumeRole: '{{ AutomationAssumeRole }}'
+        parameters:
+          AutomationAssumeRole:
+            type: String
+            description: !Sub ${ResourceNamePrefix}-${EnvironmentType}-${ApplicationID}-Role.'(Required) The ARN of the role that allows Automation to perform the actions on your behalf. If no role is specified, Systems Manager Automation uses your IAM permissions to execute this document.'
+            default: ''
+          Flag:
+            type: String
+            description: (Required) Specify the type of report you want to generate.
+            allowedValues:
+              - 'Daily'
+              - 'Montly'
+          ReportName:
+            type: String
+            description: Specify SNS TOPIC_ARN that sends notification.
+            default: ''
+          LambdaFunctionName:
+            type: String
+            description: (Required) Enter the Lambda Function name
+            default: !Sub '${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-Lambda'
+          AutoscalingGroup:
+            type: String
+            description: (Required) Enter the name of Autoscaling group
+          MetricName:
+            type: String
+            description: (Required) Specify the metric name
+            allowedValues:
+              - 'CPUUtilization'
+              - 'mem_used_percent'
+          NameSpace:
+            type: String
+            description: (Required) Specify name space
+            AllowedValues:
+              - 'AWS/EC2'
+              - 'CWAgent'
+          StartDate:
+            type: String
+            description: (Required) Specify Start Date (yyyy-mm-dd)
+            default: ''
+          EndDate:
+            type: String
+            description: (Required) Specify End Date (yyyy-mm-dd)
+            default: ''
+          BucketName:
+            type: String
+            description: Specify s3 Bucket name where report should store
+            default: ''
+          keyPath:
+            type: String
+            description: Enter the s3 key path along with report name "eg-'path/reportname.xlsx' ".
+            default: ''
+
+        mainSteps:
+          - name: InvokeLambdaFuction
+            action: 'aws:invokeLambdaFunction'
+            maxAttempts: 3
+            timeoutSeconds: 1200
+            onFailure: Abort
+            inputs:
+              FunctionName: '{{ LambdaFunctionName }}'
+              InputPayload:
+                Flag : '{{ Flag  }}'
+                AutoscalingGroup: '{{ AutoscalingGroup }}'
+                MetricName: '{{ MetricName }}'
+                NameSpace: '{{ NameSpace }}'
+                StartDate: '{{ StartDate }}'
+                EndDate: '{{ EndDate }}'
+                BucketName: '{{ BucketName }}'
+                keyPath: '{{ keyPath }}'
+                
+      DocumentFormat: YAML
+      DocumentType: Automation
+      UpdateMethod: NewVersion
+      Name: !Sub ${ResourceNamePrefix}-${EnvironmentName}-${ApplicationID}-Document
