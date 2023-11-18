@@ -89,7 +89,7 @@ async function sendEmail(parameters, bucket, key)
                         return err;
                         } else {
                             console.log('Email sent successfullyy');
-                            return "Send email";
+                            return "Send email now";
                         }
                     });
 				}
