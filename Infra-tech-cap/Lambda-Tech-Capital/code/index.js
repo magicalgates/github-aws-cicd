@@ -88,7 +88,7 @@ async function sendEmail(parameters, bucket, key)
                         console.log('Error sending email');
                         return err;
                         } else {
-                            console.log('Email sent successfully');
+                            console.log('Email sent successfullyy');
                             return "Send email";
                         }
                     });
