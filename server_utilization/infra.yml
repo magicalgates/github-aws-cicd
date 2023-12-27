@@ -96,6 +96,14 @@ Parameters:
     Type: String
     Description: Specify the Common Security group
     Default: NDS-CYNC-STAGING-COMMON-LAMBDA-SG
+  EnvironmentVariableCount:
+    Type: Number
+    Default: 3
+    Description: Number of environment variables
+  VariableNameValues:
+    Type: CommaDelimitedList
+    Default: "Keya=Lion,Keyb=Tiger,Keyc=Cheetha,Variable4=Value4,Variable5=Value5,Variable6=Value6"
+    Description: Comma-delimited list of key=value pairs for variable names and values
 
 Mappings:
   Environments:
@@ -133,6 +141,9 @@ Mappings:
         - subnet-15515b4f
         - subnet-61b51b5c
         - subnet-a2d424d4  
+        
+Conditions:
+  NeedAdditionalVariable: !Equals [!Ref EnvironmentVariableCount, 6]
   
 Resources:
   LambdaRole:
@@ -200,6 +211,9 @@ Resources:
       Role: !GetAtt LambdaRole.Arn
       Runtime: !Ref Runtime
       Timeout: !Ref Timeout
+      Environment:
+        Variables:
+          !If [NeedAdditionalVariable, !Sub "${Variable}", !Ref VariableNameValues]
       VpcConfig:
         SecurityGroupIds:
           - Fn::ImportValue:
