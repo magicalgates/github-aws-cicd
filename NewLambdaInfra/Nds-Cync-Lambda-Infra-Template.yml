@@ -80,6 +80,25 @@ Parameters:
     Type: String
     Description: Specify the Common Security group
     Default: NDS-CYNC-STAGING-COMMON-LAMBDA-SG
+  S3BucketName:
+    Type: String
+    Description: Specify S3 bucket name to store the reports.
+    Default: nds-cync-prod-tech-capital-reports
+  LoggingConfiguration:
+    Type: String
+    Description: Specify if logging configuration should be enabled
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  LoggingBucket:
+    Type: String
+    Description: Enter the access log bucket name
+    Default: ''
+  LoggingBucketPrefix:
+    Type: String
+    Description: Enter the access log bucket folder name
+    Default: ''
 
 Mappings:
   Environments:
@@ -124,7 +143,12 @@ Mappings:
         - subnet-61b51b5c
         - subnet-a2d424d4
       RetentionInDays: 731    
-  
+      
+Conditions:
+  LogConfiguration: !Equals
+    - !Ref LoggingConfiguration
+    - 'true'
+
 Resources:
   LambdaRole:
     Type: 'AWS::IAM::Role'
@@ -226,3 +250,61 @@ Resources:
           - Fn::ImportValue:
               !Ref CommonSGExportName      
         SubnetIds: !FindInMap [Environments, !Ref EnvironmentName, Subnets]
+
+  LambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Ref: DataFunction
+      Principal: s3.amazonaws.com
+      SourceArn:
+        Fn::Sub: arn:aws:s3:::${S3BucketName}
+
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: 'TRUE'
+        BlockPublicPolicy: 'TRUE'
+        IgnorePublicAcls: 'TRUE'
+        RestrictPublicBuckets: 'TRUE'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+        - ServerSideEncryptionByDefault:
+            SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+        - Id: DeleteOldObjects
+          Status: Enabled
+          Prefix: ''
+          ExpirationInDays:
+            Ref: S3ObjectExpInDays
+      BucketName:
+        Ref: S3BucketName
+      LoggingConfiguration: !If
+        - LogConfiguration
+        - DestinationBucketName: !Ref LoggingBucket
+          LogFilePrefix: !Ref LoggingBucketPrefix
+        - !Ref 'AWS::NoValue'
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          Effect: Deny
+          Principal:
+            AWS:
+              Fn::Sub: arn:aws:iam::${AWS::AccountId}:root
+          Action:
+          - s3:*
+          Resource:
+          - Fn::Sub: arn:aws:s3:::${S3BucketName}/*
+          - Fn::Sub: arn:aws:s3:::${S3BucketName}
+          Condition:
+            Bool:
+              aws:SecureTransport: false
+      Bucket:
+        Ref: S3Bucket
