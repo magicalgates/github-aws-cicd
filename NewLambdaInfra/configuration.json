@@ -15,7 +15,8 @@
         "LoggingConfiguration": "false",
         "LoggingBucket":"",
         "LoggingBucketPrefix":"",
-        "S3ObjectExpInDays":"30"
+        "S3ObjectExpInDays":"30",
+        "S3FolderNames":"Reports"
     },
     "Tags": {
         "Name": "NDS-CYNC-POC-Data-Authorizer-Lambda-Stk",
