@@ -213,7 +213,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName:
-        Fn::Sub: ${ResourceNamePrefix}-${EnvironmentType}-${ServiceName}-DataFunction
+        Fn::Sub: ${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-DataFunction
       ImageUri: 066167586502.dkr.ecr.us-east-1.amazonaws.com/application-repo:latest
       PackageType: Image
       Role: !GetAtt LambdaRole.Arn
