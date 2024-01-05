@@ -10,7 +10,11 @@
         "InfoClassification": "Internal",
         "ServiceName": "WEBSOCKET",
         "CommonSGExportName": "NDS-CYNC-TEST-COMMON-SG",
-        "Compliance": "SOC2"
+        "Compliance": "SOC2",
+        "S3BucketName": "nds-cync-Data-adding-reports",
+        "LoggingConfiguration": "false",
+        "LoggingBucket":"",
+        "LoggingBucketPrefix":""
     },
     "Tags": {
         "Name": "NDS-CYNC-POC-Data-Authorizer-Lambda-Stk",
