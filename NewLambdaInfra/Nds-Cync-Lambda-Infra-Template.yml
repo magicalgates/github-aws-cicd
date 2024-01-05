@@ -103,6 +103,10 @@ Parameters:
     Type: String
     Description: Enter the access log bucket folder name
     Default: ''
+  S3FolderNames:
+    Type: String
+    Description: Enter the s3 folder name
+    Default: ""
 
 Mappings:
   Environments:
@@ -292,6 +296,19 @@ Resources:
         - DestinationBucketName: !Ref LoggingBucket
           LogFilePrefix: !Ref LoggingBucketPrefix
         - !Ref 'AWS::NoValue'
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                - Name: prefix
+                  Value: S3FolderNames
+            Function:
+              Fn::GetAtt:
+              - DataFunction
+              - Arn
+        
   BucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
