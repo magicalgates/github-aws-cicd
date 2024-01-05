@@ -188,31 +188,31 @@ Resources:
               - Sid: VisualEditor0
                 Effect: Allow
                 Action:
-                - ecr:DescribeImageScanFindings
-                - ecr:GetLifecyclePolicyPreview
-                - ecr:GetDownloadUrlForLayer
-                - ecr:DescribeImageReplicationStatus
-                - ecr:ListTagsForResource
-                - ecr:ListImages
-                - ecr:BatchGetRepositoryScanningConfiguration
-                - ecr:UntagResource
-                - ecr:BatchGetImage
-                - ecr:DescribeImages
-                - ecr:TagResource
-                - ecr:DescribeRepositories
-                - ecr:BatchCheckLayerAvailability
-                - ecr:GetRepositoryPolicy
-                - ecr:GetLifecyclePolicy
+                  - 'ecr:DescribeImageScanFindings'
+                  - 'ecr:GetLifecyclePolicyPreview'
+                  - 'ecr:GetDownloadUrlForLayer'
+                  - 'ecr:DescribeImageReplicationStatus'
+                  - 'ecr:ListTagsForResource'
+                  - 'ecr:ListImages'
+                  - 'ecr:BatchGetRepositoryScanningConfiguration'
+                  - 'ecr:UntagResource'
+                  - 'ecr:BatchGetImage'
+                  - 'ecr:DescribeImages'
+                  - 'ecr:TagResource'
+                  - 'ecr:DescribeRepositories'
+                  - 'ecr:BatchCheckLayerAvailability'
+                  - 'ecr:GetRepositoryPolicy'
+                  - 'ecr:GetLifecyclePolicy'
                 Resource:
-                  Fn::Sub: arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/application-repo
+                  Fn::Sub: 'arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/application-repo'
               - Sid: VisualEditor1
                 Effect: Allow
                 Action:
-                - ecr:GetRegistryPolicy
-                - ecr:DescribeRegistry
-                - ecr:DescribePullThroughCacheRules
-                - ecr:GetAuthorizationToken
-                - ecr:GetRegistryScanningConfiguration
+                  - 'ecr:GetRegistryPolicy'
+                  - 'ecr:DescribeRegistry'
+                  - 'ecr:DescribePullThroughCacheRules'
+                  - 'ecr:GetAuthorizationToken'
+                  - 'ecr:GetRegistryScanningConfiguration'
                 Resource: '*'
       Path: /
       Tags:
