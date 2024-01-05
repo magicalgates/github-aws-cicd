@@ -14,7 +14,8 @@
         "S3BucketName": "nds-cync-Data-adding-reports",
         "LoggingConfiguration": "false",
         "LoggingBucket":"",
-        "LoggingBucketPrefix":""
+        "LoggingBucketPrefix":"",
+        "S3ObjectExpInDays":"30"
     },
     "Tags": {
         "Name": "NDS-CYNC-POC-Data-Authorizer-Lambda-Stk",
