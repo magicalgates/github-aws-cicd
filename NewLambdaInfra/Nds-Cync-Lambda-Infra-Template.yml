@@ -26,6 +26,10 @@ Parameters:
     Type: String
     Default: Data
     Description: Enter the service name of the current stack.
+  S3ObjectExpInDays:
+    Type: String
+    Description: Enter the objects expiry date in the S3 bucket
+    Default: '30'
   Owner:
     Type: String
     Default: NDS
