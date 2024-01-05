@@ -181,6 +181,35 @@ Resources:
                   - 's3:PutObjectAcl'
                   - 's3:GetObjectVersion'
                 Resource: '*'
+              - Sid: VisualEditor0
+                Effect: Allow
+                Action:
+                - ecr:DescribeImageScanFindings
+                - ecr:GetLifecyclePolicyPreview
+                - ecr:GetDownloadUrlForLayer
+                - ecr:DescribeImageReplicationStatus
+                - ecr:ListTagsForResource
+                - ecr:ListImages
+                - ecr:BatchGetRepositoryScanningConfiguration
+                - ecr:UntagResource
+                - ecr:BatchGetImage
+                - ecr:DescribeImages
+                - ecr:TagResource
+                - ecr:DescribeRepositories
+                - ecr:BatchCheckLayerAvailability
+                - ecr:GetRepositoryPolicy
+                - ecr:GetLifecyclePolicy
+                Resource:
+                  Fn::Sub: arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/application-repo
+              - Sid: VisualEditor1
+                Effect: Allow
+                Action:
+                - ecr:GetRegistryPolicy
+                - ecr:DescribeRegistry
+                - ecr:DescribePullThroughCacheRules
+                - ecr:GetAuthorizationToken
+                - ecr:GetRegistryScanningConfiguration
+                Resource: '*'
       Path: /
       Tags:
         - Key: Name
@@ -200,6 +229,7 @@ Resources:
         - Key: InfoClassification
           Value: !Ref InfoClassification
 
+  
   LambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -228,6 +258,30 @@ Resources:
         Owner: !Ref Owner
         InfoClassification: !Ref InfoClassification
         Compliance: !Ref Compliance
+
+  DataFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Tags:
+        Name:
+          Fn::Sub: ${ResourceNamePrefix}-${EnvironmentType}-${ServiceName}-DataFunction
+      FunctionName:
+        Fn::Sub: ${ResourceNamePrefix}-${EnvironmentType}-${ServiceName}-DataFunction
+      ImageUri: 066167586502.dkr.ecr.us-east-1.amazonaws.com/application-repo:latest
+      PackageType: Image
+      Role: !GetAtt LambdaRole.Arn
+      AutoPublishAlias: latest
+      MemorySize: 10240
+      Timeout: 900
+      Environment:
+        Variables:
+          !If [NeedAdditionalVariable, !Sub "${Variable}", !Ref VariableNameValues]
+      Description: lambda function used to extract data from CSV file and update database.
+      VpcConfig:
+        SecurityGroupIds:
+          - Fn::ImportValue:
+              !Ref CommonSGExportName      
+        SubnetIds: !FindInMap [Environments, !Ref EnvironmentName, Subnets]
 
 #################### SSM DOCUMENT CREATION ################################################
 
