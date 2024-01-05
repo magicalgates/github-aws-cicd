@@ -1,0 +1,25 @@
+{
+    "Parameters": {
+        "Timeout": "300",
+        "ResourceNamePrefix": "NDS-CYNC",
+        "EnvironmentName": "POC",
+        "LambdaMemory": "128",
+        "ApplicationID": "Data-Authorizer",
+        "Project": "NDS-CYNC",
+        "Owner": "NDS",
+        "InfoClassification": "Internal",
+        "ServiceName": "WEBSOCKET",
+        "CommonSGExportName": "NDS-CYNC-TEST-COMMON-SG",
+        "Compliance": "SOC2"
+    },
+    "Tags": {
+        "Name": "NDS-CYNC-POC-Data-Authorizer-Lambda-Stk",
+        "Owner": "NDS",
+        "Environment": "POC",
+        "Project": "NDS-CYNC",
+        "InfoClassification": "Internal",
+        "ApplicationID": "Data-Authorizer",
+        "ApplicationRole": "Data-Authorizer-CFN",
+        "Automation": "TRUE"
+    }
+}
