@@ -303,7 +303,7 @@ Resources:
               S3Key:
                 Rules:
                 - Name: prefix
-                  Value: S3FolderNames
+                  Value: !Ref S3FolderNames
             Function:
               Fn::GetAtt:
               - DataFunction
