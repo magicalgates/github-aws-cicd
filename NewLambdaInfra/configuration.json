@@ -16,7 +16,8 @@
         "LoggingBucket":"",
         "LoggingBucketPrefix":"",
         "S3ObjectExpInDays":"30",
-        "S3FolderNames":"reports"
+        "S3FolderNames":"reports",
+        "EcrRepoName":"nds-cync-dev-dataread-repo"
     },
     "Tags": {
         "Name": "NDS-CYNC-POC-Data-Authorizer-Lambda-Stk",
