@@ -4,14 +4,11 @@ phases:
   install:
     runtime-versions:
       python: 3.x
-      nodejs: 16.x
     commands:
-      - cd WebSocket/Code/
-      - npm install
-      - cd ../../
       - pip install cfn-lint
+      - ls
     finally:
-      - echo Installation phase has been completed.s
+      - echo Installation phase has been completed.
   pre_build:
     commands:
       - echo "Entered the pre_build phase..."
@@ -32,6 +29,14 @@ phases:
       - echo "Build completed on $(date)"
       - echo "Downloading the cloudformation configuration file"
       - aws s3 cp s3://${S3_CONFIGURATION_FILE_PATH} ./configuration.json
+      - echo Logging in to Amazon ECR...
+      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION) 
+      - cd NewLambdaInfra/dockercode
+      - echo Building the Docker image...   
+      - docker build -t nds-cync-dev-dataread-repo .
+      - docker images
+      - docker tag nds-cync-dev-dataread-repo:latest 066167586502.dkr.ecr.us-east-1.amazonaws.com/nds-cync-dev-dataread-repo:latest
+      - docker push 066167586502.dkr.ecr.us-east-1.amazonaws.com/nds-cync-dev-dataread-repo:latest
     finally:
       - echo Template and Configuration download
 
