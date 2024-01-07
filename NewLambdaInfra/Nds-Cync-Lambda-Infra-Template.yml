@@ -264,11 +264,11 @@ Resources:
         SubnetIds: !FindInMap [Environments, !Ref EnvironmentName, Subnets]
       Tags:
         Name:
-          Fn::Sub: ${ResourceNamePrefix}-${Environment}-${ServiceName}-DataFunction
+          Fn::Sub: ${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-DataFunction
         ApplicationRole:
           Fn::Sub: ${ApplicationID}-FUNC
         Environment:
-          Ref: Environment
+          Ref: EnvironmentName
         ApplicationID:
           Ref: ApplicationID
         Project:
