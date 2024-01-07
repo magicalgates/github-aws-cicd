@@ -107,6 +107,9 @@ Parameters:
     Type: String
     Description: Enter the s3 folder name
     Default: ""
+  EcrRepoName:
+    Type: String
+    Description: Enter the ECR repo name
 
 Mappings:
   Environments:
@@ -246,7 +249,8 @@ Resources:
     Properties:
       FunctionName:
         Fn::Sub: ${ResourceNamePrefix}-${EnvironmentName}-${ServiceName}-DataFunction
-      ImageUri: 066167586502.dkr.ecr.us-east-1.amazonaws.com/application-repo:latest
+      ImageUri: 
+        Fn::Sub: ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${EcrRepoName}:latest
       PackageType: Image
       Role: !GetAtt LambdaRole.Arn
       AutoPublishAlias: latest
@@ -258,6 +262,21 @@ Resources:
           - Fn::ImportValue:
               !Ref CommonSGExportName      
         SubnetIds: !FindInMap [Environments, !Ref EnvironmentName, Subnets]
+      Tags:
+        Name:
+          Fn::Sub: ${ResourceNamePrefix}-${Environment}-${ServiceName}-DataFunction
+        ApplicationRole:
+          Fn::Sub: ${ApplicationID}-FUNC
+        Environment:
+          Ref: Environment
+        ApplicationID:
+          Ref: ApplicationID
+        Project:
+          Ref: Project
+        Owner:
+          Ref: Owner
+        InfoClassification:
+          Ref: InfoClassification
 
   LambdaInvokePermission:
     Type: AWS::Lambda::Permission
