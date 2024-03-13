@@ -36,7 +36,7 @@ phases:
       - aws s3 cp s3://${S3_CONFIGURATION_FILE_PATH} ./configuration.json
       - ls
       - |
-        if aws lambda get-function --function-name Nds-Cync-Staging-Lambda; then
+        if aws lambda get-function --function-name Nds-Cync-Staging-Lambd; then
           echo "Function exist"
         else
           echo "Function does not exist."
