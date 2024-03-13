@@ -35,7 +35,7 @@ phases:
       - echo "Downloading the cloudformation configuration file"
       - aws s3 cp s3://${S3_CONFIGURATION_FILE_PATH} ./configuration.json
       - ls
-      - aws lambda get-function --function-name Nds-Cync-Staging-Lambda || exit 0 # Exit if function does not exist
+      - aws lambda get-function --function-name Nds-Cync-Staging-Lambd || exit 0 # Exit if function does not exist
       - |
         if [ $? -eq 0 ]; then
           echo "Function Exist"
